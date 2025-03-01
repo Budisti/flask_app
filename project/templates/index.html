@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>    
+    <!-- Graph showing active users this week -->
+    <div style="width: 600px; height: 400px;">
+        <canvas id="activeUsers"></canvas>
+    </div>
+
+    <!-- Graph showing active users this week -->
+    <div style="width: 600px; height: 400px;">
+        <canvas id="newUsers"></canvas>
+    </div>
+
+    <script>
+        // active users
+        const ctx = document.getElementById('activeUsers');
+
+        // new users
+        const ctx1 = document.getElementById('newUsers');
+    
+        // active users
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: {{ last_7_days | tojson }},
+            datasets: [{
+                data: {{ active_users | tojson}},
+            }]
+            }
+        });
+
+        // new users
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+            labels: {{ last_7_days | tojson }},
+            datasets: [{
+                data: {{ new_users | tojson}},
+            }]
+            }
+        });
+    </script>
+</body>
+</html>

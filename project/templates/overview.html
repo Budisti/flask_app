@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+</head>
+<body>
+    <p>Overview</p>
+
+    <!-- Graph showing active users this week -->
+    <div style="width: 600px; height: 400px;">
+        <canvas id="activeUsers"></canvas>
+    </div>
+
+    <!-- Graph showing total purchasers -->
+    <div style="width: 600px; height: 400px;">
+        <canvas id="totalPurchasers"></canvas>
+    </div>
+
+    <!-- Graph showing new purchasers -->
+    <div style="width: 600px; height: 400px;">
+        <canvas id="newPurchasers"></canvas>
+    </div>
+
+    <script>
+        // active users
+        const ctx = document.getElementById('activeUsers');
+
+        // total purchaers
+        const ctx1 = document.getElementById('totalPurchasers');
+
+        // new purchasers
+        const ctx2 = document.getElementById('newPurchasers');
+    
+        // active users
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: {{ last_7_days | tojson }},
+            datasets: [{
+                data: {{ total_revenue | tojson}},
+            }]
+            }
+        });
+
+        // total purchasers
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+            labels: {{ last_7_days | tojson }},
+            datasets: [{
+                data: {{ total_purchasers | tojson}},
+            }]
+            }
+        });
+
+        // first purchasers
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+            labels: {{ last_7_days | tojson }},
+            datasets: [{
+                data: {{ first_purchasers | tojson}},
+            }]
+            }
+        });
+    </script>
+</body>
+</html>
