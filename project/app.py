@@ -111,6 +111,12 @@ def overview():
             if (data[1][j] == last_7_dates[i]):
                 total_revenue[i] += data[0][j]
 
+    # total revenue
+    total_revenue1 = 0
+
+    for i in range(len(total_revenue)):
+        total_revenue1 += total_revenue[i]
+
     # total purchasers for each date
     total_purchasers = [0,0,0,0,0,0,0]
 
@@ -126,6 +132,11 @@ def overview():
         for j in range(len(data)):
             if (data[1][j] == last_7_dates[i]):
                 total_purchasers[i] = total_purchasers[i] + 1
+
+    total_purchasers1= 0
+        
+    for i in range(len(total_purchasers)):
+        total_purchasers1 += total_purchasers[i]
 
     # first time purchasers for each date
     first_purchasers = [0,0,0,0,0,0,0]
@@ -144,12 +155,110 @@ def overview():
             if (data[1][j] == last_7_dates[i]):
                 first_purchasers[i] = first_purchasers[i] + 1
 
+    first_purchasers1 = 0
+
+    for i in range(len(first_purchasers)):
+        first_purchasers1 += first_purchasers[i]
+
+    # average purchase revenue per date
+
+    # get columns for the unique users that have purchased
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_7_dates[0], last_7_dates[-1]))
+
+    # fetch data
+    rows = cur.fetchall()
+
+    # count unique purchasers for each date
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    # unique users that purchased
+    unique_user_purchases = data
+
+    # number of users
+    total_users = [0,0,0,0,0,0,0]
+
+    # get number of purchasers for everyday
+    for i in range(len(total_users)):
+        for j in range(len(unique_user_purchases)):
+            if (unique_user_purchases[1][j] == last_7_dates[i]):
+                total_users[i] = total_users[i] + 1
+
+    # get data for purchases
+    cur.execute('SELECT user_id, purchase_date, total_price FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_7_dates[0], last_7_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    # total amount spent by users per day 
+    total_day = [0,0,0,0,0,0,0]
+
+    # get total for everyday
+    for i in range(len(total_day)):
+        for j in range(len(data)):
+            if (data[1][j] == last_7_dates[i]):
+                total_day[i] += round(data[2][j], 2)
+
+    # round numbers
+    for i in range(len(total_day)):
+        total_day[i] = round(total_day[i], 2)
+
+    # get average
+    average = [0,0,0,0,0,0,0]
+
+    for i in range(len(average)):
+        if (total_users[i] != 0):
+            average[i] = total_day[i] / total_users[i]
+
+    # total average
+
+    # total number of users
+    total_users_number = 0
+
+    for i in range(len(total_users)):
+        total_users_number += total_users[i]
+
+    # total number
+    total = 0
+
+    for i in range(len(total_day)):
+        total += total_day[i]
+
+    # get average
+    average_total = 0
+
+    if (total_users_number != 0):
+        average_total = total / total_users_number
+
+    # items that were purchased more
+    cur.execute('SELECT p.name AS product_name, pu.product_id, SUM(pu.quantity) AS total_quantity, SUM(pu.total_price) AS total_price FROM purchases pu JOIN products p ON pu.product_id = p.id GROUP BY pu.product_id, p.name ORDER BY total_quantity DESC LIMIT 7')
+
+    rows = cur.fetchall()
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    items = []
+
+    quantity = []
+
+    for i in range(len(data)):
+        items.append(data[0][i])
+
+    for i in range(len(data)):
+        quantity.append(int(data[2][i]))
+
     # close database
     con.commit()
 
     con.close()
 
-    return render_template('overview.html', last_7_days=last_7_days, total_revenue=total_revenue, total_purchasers=total_purchasers, first_purchasers=first_purchasers)
+    return render_template('overview.html', last_7_days=last_7_days, total_revenue=total_revenue, total_revenue1=total_revenue1,total_purchasers=total_purchasers, total_purchasers1=total_purchasers1,first_purchasers=first_purchasers, first_purchasers1=first_purchasers1, average=average, average_total=average_total,items=items, quantity=quantity)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
