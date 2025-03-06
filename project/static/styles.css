@@ -1,147 +1,37 @@
-/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    color: #202124;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 280px;
-    background-color: #202124;
-    color: white;
+    margin: 20px;
     padding: 20px;
-    height: 100vh;
-    position: fixed;
+    background-color: #f4f4f4;
+}
+h1, h2, h3 {
+    color: #333;
+}
+.container {
     display: flex;
-    flex-direction: column;
-}
-
-.sidebar h2 {
-    font-size: 1.2em;
-    margin-bottom: 20px;
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-}
-
-.sidebar li {
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #bdc1c6;
-}
-
-.sidebar .active {
-    font-weight: bold;
-    color: #4285F4;
-}
-
-/* Main Content */
-.content {
-    margin-left: 300px;
-    width: calc(100% - 300px);
-    padding: 20px;
-}
-
-/* Header */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-header h1 {
-    font-size: 20px;
-    font-weight: 500;
-}
-
-header p {
-    font-size: 14px;
-    color: #5f6368;
-}
-
-/* Metrics Grid */
-.metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    flex-wrap: wrap;
     gap: 20px;
 }
-
-/* Card Styles */
 .card {
-    background: white;
-    padding: 15px 20px;
-    border-radius: 10px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: left;
+    flex: 1 1 calc(50% - 40px);
+    box-sizing: border-box;
 }
-
 .card h3 {
-    font-size: 14px;
-    font-weight: 500;
-    color: #5f6368;
-    margin-bottom: 5px;
+    margin-top: 0;
 }
-
-.value {
-    font-size: 24px;
-    font-weight: bold;
-    color: #202124;
-    margin-bottom: 10px;
-}
-
-/* Chart Styling */
-canvas {
+.chart-container {
     width: 100%;
-    height: 150px;
+    height: 300px; /* Adjusted height for better visibility */
+    margin-top: 10px; /* Reduced margin */
 }
-
-/* Items Purchased Section */
-.items {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+.card:last-child {
+    flex: 1 1 60%; /* Make the last card narrower */
+    margin: 0 auto; /* Center the last card */
 }
-
-.items .card {
-    flex: 1;
-    max-width: 500px;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 220px;
-    }
-    .content {
-        margin-left: 240px;
-    }
-}
-
-@media (max-width: 768px) {
-    body {
-        flex-direction: column;
-    }
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-    }
-    .content {
-        margin-left: 0;
-        width: 100%;
-    }
-    .metrics {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
-    .items {
-        flex-direction: column;
-    }
+.card:last-child .chart-container {
+    height: 400px; /* Larger height for the last graph */
 }

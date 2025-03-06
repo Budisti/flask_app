@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 import sqlite3
 from datetime import datetime, timedelta
+import numpy
 import pandas as pd
 
 app = Flask(__name__)
@@ -259,6 +260,51 @@ def overview():
     con.close()
 
     return render_template('overview.html', last_7_days=last_7_days, total_revenue=total_revenue, total_revenue1=total_revenue1,total_purchasers=total_purchasers, total_purchasers1=total_purchasers1,first_purchasers=first_purchasers, first_purchasers1=first_purchasers1, average=average, average_total=average_total,items=items, quantity=quantity)
+
+@app.route("/ecommercePurchases")
+def ecommercePurchases():
+    # get last 7 days
+    last_7_days = [(datetime.now() - timedelta(days=i)).strftime('%d') for i in range(6, -1, -1)]
+
+    # get last 7 dates
+    last_7_dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
+
+    # connect to database
+    con = sqlite3.connect("database.db")
+
+    # cursor
+    cur = con.cursor()
+
+    # top 10 items by revenue
+    cur.execute('SELECT p.name AS product_name, COUNT(DISTINCT pv.id) AS view_count, COUNT(DISTINCT CASE WHEN ca.action = "add" THEN ca.id END) AS add_to_cart_count, COALESCE(pu.purchase_count, 0) AS purchase_count, COALESCE(pu.total_revenue, 0) AS total_revenue FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id LEFT JOIN cart_actions ca ON p.id = ca.product_id LEFT JOIN (SELECT product_id, COUNT(id) AS purchase_count, SUM(total_price) AS total_revenue FROM purchases GROUP BY product_id) pu ON p.id = pu.product_id GROUP BY p.id ORDER BY total_revenue DESC LIMIT 10')
+
+    top_revenue = cur.fetchall()
+
+    print(top_revenue)
+
+    # purchases
+    cur.execute('SELECT name, total_price, purchase_date FROM purchases JOIN products ON purchases.product_id = products.id')
+
+    purchases = cur.fetchall()
+
+    # revenue = numpy.zeros((5,7))
+
+    # for every item in rows
+    #for i in range(len(rows)):
+        # for every date in the last 7 dates
+     #   for j in range(len(last_7_dates)):
+            # for every purchase made
+      #      for k in range(len(purchases)):
+                # if the row in purchases matches the name and the date
+       #         if (purchases[k][0] == rows[i][0] and purchases[k][2] == last_7_dates[j]):
+        #            revenue[i][j] = purchases[k][1]
+
+    # close database
+    con.commit()
+
+    con.close()
+
+    return render_template("ecommercePurchases.html", top_revenue=top_revenue, last_7_days=last_7_days)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

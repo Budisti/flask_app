@@ -28,6 +28,12 @@ print("Connected to database successfully")
 
 # cur.execute('INSERT INTO purchases (user_id, product_id, quantity, total_price, purchase_date) VALUES(2, 2, 1, 799.49, "2025-02-07"),(2, 5, 1, 129.99, "2025-02-10"),(3, 4, 2, 99.98, "2025-02-12"),(3, 7, 1, 99.99, "2025-02-15"),(4, 6, 1, 249.99, "2025-02-18"),(4, 8, 3, 119.97, "2025-02-20"),(5, 1, 1, 1200.99, "2025-02-22"),(5, 2, 1, 799.49, "2025-02-25")')
 
+# conn.execute('CREATE TABLE cart_actions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, product_id INTEGER NOT NULL, action TEXT NOT NULL, action_date DATE NOT NULL,FOREIGN KEY (user_id) REFERENCES users(id),FOREIGN KEY (product_id) REFERENCES products(id))')
+
+# CREATE TABLE product_views (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER,product_id INTEGER NOT NULL,view_date DATE,FOREIGN KEY (user_id) REFERENCES users(id),FOREIGN KEY (product_id) REFERENCES products(id));
+
+# cur.execute('INSERT INTO product_views (user_id, product_id, view_date) VALUES (17, 10, "2025-02-25"), (17, 11, "2025-02-26"), (17, 12, "2025-02-27"),  (18, 11, "2025-02-26"),  (18, 12, "2025-02-27"),  (18, 13, "2025-02-28"),  (19, 12, "2025-02-27"),  (19, 13, "2025-02-28"),  (19, 14, "2025-03-01"),  (20, 13, "2025-02-28"),  (20, 14, "2025-03-01"),  (20, 10, "2025-03-02"),  (21, 14, "2025-03-01"),  (21, 10, "2025-03-02"),  (21, 11, "2025-03-03")')
+
 print("Created table successfully!")
 
 conn.close()

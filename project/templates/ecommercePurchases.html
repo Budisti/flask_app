@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce Purchases</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Graph-->
+    <!-- Graph showing active users this week -->
+    <div style="width: 1000px; height: 400px;">
+        <canvas id="graph"></canvas>
+    </div>
+    
+    <!-- Table to display the first 10 items with the most revenue -->
+    <table>
+        <tr>
+            <th></th>
+            <th>Item name</th>
+            <th>Items viewed</th>
+            <th>Items added to card</th>
+            <th>Items purchased</th>
+            <th>Items revenue</th>
+        </tr>
+
+        {% for row in top_revenue %}
+        <tr>
+            <!-- checkbox for every row-->
+            <td><input type="checkbox" name="{{ row[0] }}"></td>
+
+            {% for item in row %}
+
+                <td> {{ item }} </td>
+
+            {% endfor %}
+        </tr>
+        {% endfor %}
+
+    <script>
+        const ctx = document.getElementById('graph');
+    
+        // active users
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: [0,0,0,0,0,0,0],
+            datasets: 
+            [
+                {
+                    data: [0,0,0,0,0,0,0],
+                },
+                { 
+                    data: [1,1,1,1,1,1,1],
+                },
+            ]
+            }
+        });
+    </script>
+</body>
+</html>
