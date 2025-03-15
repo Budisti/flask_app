@@ -5,55 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ecommerce Purchases</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            color: #343a40;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .date-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        select, button {
+            padding: 10px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        .filter-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 10px;
+            color: #343a40;
+        }
+        .filter-select {
+            background: #ff9800;
+            color: white;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filter-select:hover {
+            background: #e68900;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+    </style>
 </head>
 <body>
-    <!-- Graph-->
-    <!-- Graph showing active users this week -->
-    <div style="width: 1000px; height: 400px;">
-        <canvas id="graph"></canvas>
+    <div class="container">
+        <h3>Ecommerce Purchases</h3>
+        <p class="date-header">{{ last_day }} - {{ today }}</p>
+        <p><strong>Current Filter:</strong> {{ filter_header }}</p>
+        <div class="chart-container">
+            <canvas id="graph"></canvas>
+        </div>
+        <form action="/ecommercePurchases" method="post">
+            <div class="filter-group">
+                <label class="filter-label">Select Time Range:</label>
+                <select name="days" id="days" class="filter-select">
+                    <option value="week">Last Week</option>
+                    <option value="month">Last Month</option>
+                </select>
+            </div>
+            <table>
+                <tr>
+                    <th>
+                        <select name="filters" id="filters">
+                            <option value="views">Views</option>
+                            <option value="cart">Cart</option>
+                            <option value="purchased">Purchased</option>
+                            <option value="revenue">Revenue</option>
+                        </select>
+                    </th>
+                    <th>Ranking</th>
+                    <th>Item Name</th>
+                    <th>Items Viewed</th>
+                    <th>Items Added to Cart</th>
+                    <th>Items Purchased</th>
+                    <th>Revenue</th>
+                </tr>
+                {% for i in range(data|length) %}
+                <tr>
+                    <td><input type="checkbox" name="products" value="{{ data[i][0] }}"></td>
+                    <td>{{ i + 1 }}</td>
+                    {% for j in range(data[i]|length) %}
+                    <td>{{ data[i][j] }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="7">
+                        <button type="submit">Submit</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
     </div>
-    
-    <!-- Table to display the first 10 items with the most revenue -->
-    <table>
-        <tr>
-            <th></th>
-            <th>Item name</th>
-            <th>Items viewed</th>
-            <th>Items added to card</th>
-            <th>Items purchased</th>
-            <th>Items revenue</th>
-        </tr>
-
-        {% for row in top_revenue %}
-        <tr>
-            <!-- checkbox for every row-->
-            <td><input type="checkbox" name="{{ row[0] }}"></td>
-
-            {% for item in row %}
-
-                <td> {{ item }} </td>
-
-            {% endfor %}
-        </tr>
-        {% endfor %}
-
     <script>
         const ctx = document.getElementById('graph');
-    
-        // active users
         new Chart(ctx, {
             type: 'line',
             data: {
-            labels: [0,0,0,0,0,0,0],
-            datasets: 
-            [
-                {
-                    data: [0,0,0,0,0,0,0],
-                },
-                { 
-                    data: [1,1,1,1,1,1,1],
-                },
-            ]
+                labels: {{ days | tojson }},
+                datasets: [
+                    {% if default|length > 0 %}
+                        {% for i in range(default|length) %}
+                            {
+                                data: {{ default[i] | tojson }},
+                                label: '{{ products[i] }}',
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                                tension: 0.4
+                            },
+                        {% endfor %}
+                    {% else %}
+                        {
+                            data: {{ default | tojson }},
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                            tension: 0.4
+                        },
+                    {% endif %}
+                ]
             }
         });
     </script>
