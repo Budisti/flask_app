@@ -34,6 +34,16 @@ print("Connected to database successfully")
 
 # cur.execute('INSERT INTO product_views (user_id, product_id, view_date) VALUES (17, 10, "2025-02-25"), (17, 11, "2025-02-26"), (17, 12, "2025-02-27"),  (18, 11, "2025-02-26"),  (18, 12, "2025-02-27"),  (18, 13, "2025-02-28"),  (19, 12, "2025-02-27"),  (19, 13, "2025-02-28"),  (19, 14, "2025-03-01"),  (20, 13, "2025-02-28"),  (20, 14, "2025-03-01"),  (20, 10, "2025-03-02"),  (21, 14, "2025-03-01"),  (21, 10, "2025-03-02"),  (21, 11, "2025-03-03")')
 
+# conn.execute('DROP TABLE user_locations')
+
+# conn.execute('CREATE TABLE user_locations (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, latitude DECIMAL(9,6) NOT NULL, longitude DECIMAL(9,6) NOT NULL, street_address VARCHAR(255) NOT NULL, FOREIGN KEY (user_id) REFERENCES users(user_id))')
+
+# conn.execute('CREATE TABLE user_location (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, latitude FLOAT NOT NULL, longitude FLOAT NOT NULL, street_address TEXT NOT NULL, FOREIGN KEY (user_id) REFERENCES users(user_id))')
+
+# conn.execute('CREATE TABLE page_views (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, page_title TEXT NOT NULL, view_date DATE NOT NULL, FOREIGN KEY (user_id) REFERENCES users(user_id))')
+
+# conn.execute('ALTER TABLE user_activity ADD COLUMN login_time TIME')
+
 print("Created table successfully!")
 
 conn.close()

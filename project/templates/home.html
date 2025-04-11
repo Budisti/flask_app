@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    
+    <!-- leaflet css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+    <!-- chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .clickable-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 250px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .clickable-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            transform: scale(1.05);
+        }
+        .clickable-card p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .clickable-card h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #007bff;
+        }
+        #map { 
+            height: 100%;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            flex: 1;
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Home</h3>
+
+    <!-- navigation -->
+    
+    <!-- Clickable Card for Average Purchase Revenue -->
+    <div class="clickable-card" onclick="average()">
+        <p>Average Purchase Revenue</p>
+        <h2 id="average_total">{{ average_total }} $</h2>
+    </div>
+
+    <!-- Clickable Card for Active Users -->
+    <div class="clickable-card" onclick="activeUsers()">
+        <p>Active Users</p>
+        <h2 id="active_users">{{ total_active }} </h2>
+    </div>
+
+    <!-- Clickable Card for Events -->
+    <div class="clickable-card" onclick="eventsCount()">
+        <p>Events count</p>
+        <h2 id="events_count"> {{ total_count_events }} </h2>
+    </div>
+
+    <!-- Clickable Card for Purchasers -->
+    <div class="clickable-card" onclick="purchasers()">
+        <p>Purchasers</p>
+        <h2 id="purchasers_count"> {{ total_purchasers1 }} </h2>
+    </div>
+
+    <!-- line graph -->
+    <div style="width: 30%; height: 30%;">
+        <canvas id="purchaseJourney"></canvas>
+    </div>
+
+    <!-- most viewed countries -->
+    <p>Countries</p>
+
+    <!-- select -->
+    <select name="countries_options" id="countries_options" onchange="updateCountries(this)">
+        <option value="active_users">Active Users</option>
+        <option value="new_users">New Users</option>
+    </select>
+
+    <label for="countryUsers">Country</label>
+
+    <!-- graph -->
+    <div style="width: 30%; height: 30%;">
+        <canvas id="countryUsers"></canvas>
+    </div>
+
+    <!-- Most viewed products -->
+    <p>Most viewed products</p>
+
+    <!-- graph -->
+    <div style="width: 30%; height: 30%;">
+        <canvas id="mostViewedProducts"></canvas>
+    </div>
+
+    <!-- select date for most viewed products -->
+     <select name="date_mostViewedProducts" id="date_mostViewedProducts" onchange="updateMostViewed(this)">
+        <option value="last_7">Last 7</option>
+        <option value="last_14">Last 14</option>
+        <option value="last_28">Last 28</option>
+     </select>
+
+    <div id="map"></div>
+
+    <!-- leaflet js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <script>
+        var map = L.map('map').setView([37.9775, 23.7326], 13);
+        
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Get graph context
+        const ctx = document.getElementById('purchaseJourney').getContext('2d');
+        
+        // Initialize the chart
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: "User Journey",
+                    data: {{ average | tojson }},
+                    borderColor: 'blue',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+        function average() {
+            const values = {{ average | tojson }};
+
+            // Update chart data
+            chart.data.datasets[0].data = values;
+
+            chart.update();
+        }
+
+        function activeUsers() {
+            const values = {{ active_users | tojson }};
+
+            // Update chart data
+            chart.data.datasets[0].data = values;
+
+            chart.update();
+        }
+
+        function eventsCount() {
+            const values = {{ count_events | tojson }};
+
+            // Update chart data
+            chart.data.datasets[0].data = values;
+
+            chart.update();
+        }
+
+        function purchasers() {
+            const values = {{ total_purchasers | tojson }};
+
+            // Update chart data
+            chart.data.datasets[0].data = values;
+
+            chart.update();
+        }
+
+        // countries
+        const ctx1 = document.getElementById('countryUsers');
+
+        const countries = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: {{ active_users_countries | tojson }},
+                datasets: [{
+                    data:  {{ active_users_count | tojson }},
+                    label: "Users",
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        function updateCountries(option) {
+            // Data for new users
+            const newUsers_count = {{ new_users_count | tojson }};
+
+            const newUsers_countries = {{ new_users_countries | tojson }};
+
+            // data for active users
+            const activeUsers_count = {{ active_users_count | tojson }};
+
+            const activeUsers_country = {{ active_users_countries | tojson }};
+
+            if (option.value == "new_users") {
+                
+                countries.data.datasets[0].data = newUsers_count;
+
+                countries.data.labels = newUsers_countries;
+
+                countries.update();
+            }
+
+            if(option.value == "active_users") {
+                
+                countries.data.datasets[0].data = activeUsers_count;
+
+                countries.data.labels = activeUsers_country;
+
+                countries.update();
+            }
+        }
+
+        // most viewed products
+        const ctx2 = document.getElementById('mostViewedProducts');
+
+        const mostViewedProductsGraph = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: {{ most_viewed_products_names_last7 | tojson }},
+                datasets: [{
+                    data:  {{ most_viewed_products_count_last7 | tojson }},
+                    label: "Views",
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // most viewed days
+        function updateMostViewed(option) {
+            // last 7 days
+            const last_7_days_count = {{ most_viewed_products_count_last7 | tojson }};
+
+            const last_7_days_names = {{ most_viewed_products_names_last7 | tojson }};
+
+             // last 14 days
+             const last_14_days_count = {{ most_viewed_products_count_last14 | tojson }};
+
+            const last_14_days_names = {{ most_viewed_products_names_last14 | tojson }};
+            
+            // last 28 days
+            const last_28_days_count = {{ most_viewed_products_count_last28 | tojson }};
+
+            const last_28_days_names = {{ most_viewed_products_names_last28 | tojson }};    
+
+            if (option.value == "last_7") {
+                
+                mostViewedProductsGraph.data.datasets[0].data = last_7_days_count;
+
+                mostViewedProductsGraph.data.labels = last_7_days_names;
+
+                mostViewedProductsGraph.update();
+            }
+
+            if (option.value == "last_14") {
+                
+                mostViewedProductsGraph.data.datasets[0].data = last_14_days_count;
+
+                mostViewedProductsGraph.data.labels = last_14_days_names;
+
+                mostViewedProductsGraph.update();
+            }
+
+            if (option.value == "last_28") {
+                
+                mostViewedProductsGraph.data.datasets[0].data = last_28_days_count;
+
+                mostViewedProductsGraph.data.labels = last_28_days_names;
+
+                mostViewedProductsGraph.update();
+            }
+        }
+
+    </script>
+</body>
+</html>
