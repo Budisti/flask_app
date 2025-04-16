@@ -10,10 +10,18 @@
 <body>
     <h1>Monetization Overview</h1>
 
+    <h4>Filters</h4>
+
+    <h5 onclick="last7days()">Last 7 days</h3>
+
+    <h5 onclick="last30days()">Last 30 days</h3>
+
+    <h5 onclick="last60days()">Last 60 days</h3>
+
     <div class="container">
         <div class="card">
             <h3>Total Revenue</h3>
-            <p>${{ total_revenue1 }}</p>
+            <p id="total_revenue_header">${{ total_revenue1 }}</p>
             <div class="chart-container">
                 <canvas id="totalRevenue"></canvas>
             </div>
@@ -21,7 +29,7 @@
 
         <div class="card">
             <h3>Total Purchasers</h3>
-            <p>{{ total_purchasers1 }}</p>
+            <p id="total_purchasers_header">{{ total_purchasers1 }}</p>
             <div class="chart-container">
                 <canvas id="totalPurchasers"></canvas>
             </div>
@@ -29,7 +37,7 @@
 
         <div class="card">
             <h3>First Time Purchasers</h3>
-            <p>{{ first_purchasers1 }}</p>
+            <p id="first_purchasers_header">{{ first_purchasers1 }}</p>
             <div class="chart-container">
                 <canvas id="newPurchasers"></canvas>
             </div>
@@ -37,7 +45,7 @@
 
         <div class="card">
             <h3>Average Purchase Revenue per User</h3>
-            <p>${{ average_total }}</p>
+            <p id="average_purchase_header">${{ average_total_7 }}</p>
             <div class="chart-container">
                 <canvas id="average"></canvas>
             </div>
@@ -52,15 +60,15 @@
     </div>
 
     <script>
-        // active users
+        // total revenue
         const ctx = document.getElementById('totalRevenue');
-        new Chart(ctx, {
+        const revenue_graph = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: {{ last_7_days | tojson }},
                 datasets: [{
                     label: 'Total Revenue',
-                    data: {{ total_revenue | tojson }},
+                    data: {{ total_revenue_7 | tojson }},
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 2
                 }]
@@ -69,13 +77,14 @@
 
         // total purchasers
         const ctx1 = document.getElementById('totalPurchasers');
-        new Chart(ctx1, {
+        
+        const total_purchasers_graph = new Chart(ctx1, {
             type: 'line',
             data: {
                 labels: {{ last_7_days | tojson }},
                 datasets: [{
                     label: 'Total Purchasers',
-                    data: {{ total_purchasers | tojson }},
+                    data: {{ total_purchasers_7 | tojson }},
                     borderColor: 'rgba(153, 102, 255, 1)',
                     borderWidth: 2
                 }]
@@ -84,13 +93,13 @@
 
         // first purchasers
         const ctx2 = document.getElementById('newPurchasers');
-        new Chart(ctx2, {
+        const first_purchasers_graph = new Chart(ctx2, {
             type: 'line',
             data: {
                 labels: {{ last_7_days | tojson }},
                 datasets: [{
                     label: 'First Time Purchasers',
-                    data: {{ first_purchasers | tojson }},
+                    data: {{ first_purchasers7 | tojson }},
                     borderColor: 'rgba(255, 159, 64, 1)',
                     borderWidth: 2
                 }]
@@ -99,13 +108,13 @@
 
         // average
         const ctx3 = document.getElementById('average');
-        new Chart(ctx3, {
+        const average_graph = new Chart(ctx3, {
             type: 'line',
             data: {
                 labels: {{ last_7_days | tojson }},
                 datasets: [{
                     label: 'Average Purchase Revenue per User',
-                    data: {{ average | tojson }},
+                    data: {{ average_7 | tojson }},
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2
                 }]
@@ -114,19 +123,183 @@
 
         // most sold items
         const ctx4 = document.getElementById('mostSold');
-        new Chart(ctx4, {
+        items_graph = new Chart(ctx4, {
             type: 'bar',
             data: {
-                labels: {{ items | tojson }},
+                labels: {{ items_7 | tojson }},
                 datasets: [{
                     label: 'Items Purchased',
-                    data: {{ quantity | tojson }},
+                    data: {{ quantity_7 | tojson }},
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1
                 }]
             }
         });
+
+        // last7days
+        function last7days() {
+
+            // --- last 7 days ---
+            const last7dates = {{ last_7_days | tojson }};
+            
+            // --- last 7 days data for graphs ---
+            const last7days_totalRevenue = {{ total_revenue_7 | tojson }};
+
+            const last7days_totalPurchasers = {{ total_purchasers_7 | tojson }};
+
+            const last7days_firstPurchasers = {{ first_purchasers7 | tojson }};
+
+            const last7days_average = {{ average_7 | tojson }};
+
+            const last7days_quantity = {{ quantity_7 | tojson }};
+
+            const last7days_items = {{ items_7 | tojson }};
+
+            // --- last 7 days data for headers ---
+            const last7days_headerRvenue = {{ total_revenue1 }};
+            
+            const last7days_headerTotalPurchasers = {{ total_purchasers1 }};
+
+            const last7days_headerFirstPurchasers = {{ first_purchasers1 }};
+
+            const last7days_averageHeader = {{ average_total_7 }};
+
+            // --- revenue ---
+            revenue_graph.data.datasets[0].data = last7days_totalRevenue;
+
+            revenue_graph.data.labels = last7dates;
+            
+            revenue_graph.update();
+
+            document.getElementById('total_revenue_header').innerHTML = "$" + last7days_headerRvenue;
+
+            // --- total purchasers ---
+            total_purchasers_graph.data.datasets[0].data = last7days_totalPurchasers;
+
+            total_purchasers_graph.data.labels = last7dates;
+
+            total_purchasers_graph.update();
+
+            document.getElementById('total_purchasers_header').innerHTML = last7days_headerTotalPurchasers;
+
+            // --- first purchasers ---
+            first_purchasers_graph.data.datasets[0].data = last7days_firstPurchasers;
+
+            first_purchasers_graph.data.labels = last7dates;
+
+            first_purchasers_graph.update();
+
+            document.getElementById('first_purchasers_header').innerHTML = last7days_headerFirstPurchasers;
+
+            // --- average ---
+            average_graph.data.datasets[0].data = last7days_average;
+
+            average_graph.data.labels = last7dates;
+
+            average_graph.update();
+
+            document.getElementById('average_purchase_header').innerHTML = "$" + last7days_averageHeader;
+
+            // --- most sold items ---
+            items_graph.data.datasets[0].data = last7days_quantity;
+
+            items_graph.data.labels = last7days_items;
+
+            items_graph.update();
+        }
+
+        function last30days() {
+
+            // --- revenue ---
+            revenue_graph.data.datasets[0].data = {{ total_revenue_30 | tojson}};
+
+            revenue_graph.data.labels = {{ last_30_days | tojson }};
+            
+            revenue_graph.update();
+
+            document.getElementById('total_revenue_header').innerHTML = "$" + {{ total_revenue2 | tojson }};
+
+            // --- total purchasers ---
+            total_purchasers_graph.data.datasets[0].data = {{ total_purchasers_30 | tojson}};
+
+            total_purchasers_graph.data.labels = {{ last_30_days | tojson }};
+
+            total_purchasers_graph.update();
+
+            document.getElementById('total_purchasers_header').innerHTML = "$" + {{ total_purchasers2 | tojson }};
+
+            // --- first purchasers ---
+            first_purchasers_graph.data.datasets[0].data = {{ first_purchasers30 | tojson }};
+
+            first_purchasers_graph.data.labels = {{ last_30_days | tojson }};
+
+            first_purchasers_graph.update();
+
+            document.getElementById('first_purchasers_header').innerHTML = {{ first_purchasers2 | tojson }};
+
+            // --- average ---
+            average_graph.data.datasets[0].data = {{ average_30 }};
+
+            average_graph.data.labels = {{ last_30_days | tojson }};
+
+            average_graph.update();
+
+            document.getElementById('average_purchase_header').innerHTML = "$" + {{ average_total_30 }};
+
+            // --- most sold items ---
+            items_graph.data.datasets[0].data = {{ quantity_30 | tojson }};
+
+            items_graph.data.labels = {{ items_30 | tojson }};
+
+            items_graph.update();
+        }
+
+        function last60days() {
+
+            // --- revenue ---
+            revenue_graph.data.datasets[0].data = {{ total_revenue_60 | tojson}};
+
+            revenue_graph.data.labels = {{ last_60_days | tojson }};
+
+            revenue_graph.update();
+
+            document.getElementById('total_revenue_header').innerHTML = "$" + {{ total_revenue3 | tojson }};
+
+            // --- total purchasers ---
+            total_purchasers_graph.data.datasets[0].data = {{ total_purchasers_60 | tojson}};
+
+            total_purchasers_graph.data.labels = {{ last_60_days | tojson }};
+
+            total_purchasers_graph.update();
+
+            document.getElementById('total_purchasers_header').innerHTML = {{ total_purchasers3 | tojson }};
+
+            // --- first purchasers ---
+            first_purchasers_graph.data.datasets[0].data = {{ first_purchasers60 | tojson }};
+
+            first_purchasers_graph.data.labels = {{ last_60_days | tojson }};
+
+            first_purchasers_graph.update();
+
+            document.getElementById('first_purchasers_header').innerHTML = {{ first_purchasers3 | tojson }};
+
+            // --- average ---
+            average_graph.data.datasets[0].data = {{ average_60 | tojson }};
+
+            average_graph.data.labels = {{ last_60_days | tojson }};
+
+            average_graph.update();
+
+            document.getElementById('average_purchase_header').innerHTML = "$" + {{ average_total_60 }};
+
+            // --- most sold items ---
+            items_graph.data.datasets[0].data = {{ quantity_60 | tojson }};
+
+            items_graph.data.labels = {{ items_60 | tojson }};
+
+            items_graph.update();
+        }
     </script>
 </body>
 </html>

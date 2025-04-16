@@ -93,8 +93,17 @@ def overview():
     # get last 7 dates
     last_7_dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
 
-    # total revenue for each date
-    total_revenue = [0,0,0,0,0,0,0]
+    # get last 30 dates
+    last_30_dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(29, -1, -1)]
+
+    # get last 30 days
+    last_30_days = [(datetime.now() - timedelta(days=i)).strftime('%d') for i in range(29, -1, -1)]
+
+    # get last 60 dates
+    last_60_dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(59, -1, -1)]
+
+    # get last 60 days
+    last_60_days = [(datetime.now() - timedelta(days=i)).strftime('%d') for i in range(59, -1, -1)]
 
     # connect to database
     con = sqlite3.connect("database.db")
@@ -102,27 +111,71 @@ def overview():
     # cursor
     cur = con.cursor()
 
+    # revenue last 7 dates
     cur.execute('SELECT total_price, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_7_dates[0], last_7_dates[-1]))
 
     rows = cur.fetchall()
 
-    print(rows)
+    # total revenue for last 7 dates
+    total_revenue_7 = [0,0,0,0,0,0,0]
 
     data = pd.DataFrame.from_dict(rows)
 
-    for i in range(len(total_revenue)):
+    for i in range(len(total_revenue_7)):
         for j in range(len(data)):
             if (data[1][j] == last_7_dates[i]):
-                total_revenue[i] += data[0][j]
+                total_revenue_7[i] += data[0][j]
 
     # total revenue
     total_revenue1 = 0
 
-    for i in range(len(total_revenue)):
-        total_revenue1 += total_revenue[i]
+    for i in range(len(total_revenue_7)):
+        total_revenue1 += total_revenue_7[i]
 
-    # total purchasers for each date
-    total_purchasers = [0,0,0,0,0,0,0]
+    # revenue last 30 dates
+    cur.execute('SELECT total_price, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_30_dates[0], last_30_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # total revenue for last 30 dates
+    total_revenue_30 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+    data = pd.DataFrame.from_dict(rows)
+
+    for i in range(len(total_revenue_30)):
+        for j in range(len(data)):
+            if (data[1][j] == last_30_dates[i]):
+                total_revenue_30[i] += data[0][j]
+
+    # total revenue
+    total_revenue2 = 0
+
+    for i in range(len(total_revenue_30)):
+        total_revenue2 += total_revenue_30[i]
+
+    # revenue last 60 dates
+    cur.execute('SELECT total_price, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_60_dates[0], last_60_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # total revenue for last 60 dates
+    total_revenue_60 = [0] * 60
+
+    data = pd.DataFrame.from_dict(rows)
+
+    for i in range(len(total_revenue_60)):
+        for j in range(len(data)):
+            if (data[1][j] == last_60_dates[i]):
+                total_revenue_60[i] += data[0][j]
+
+    # total revenue
+    total_revenue3 = 0
+
+    for i in range(len(total_revenue_60)):
+        total_revenue3 += total_revenue_60[i]
+
+    # total purchasers for last 7 days
+    total_purchasers_7 = [0] * 7
 
     cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_7_dates[0], last_7_dates[-1]))
 
@@ -132,21 +185,20 @@ def overview():
 
     data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
 
-    for i in range(len(total_purchasers)):
+    for i in range(len(total_purchasers_7)):
         for j in range(len(data)):
             if (data[1][j] == last_7_dates[i]):
-                total_purchasers[i] = total_purchasers[i] + 1
+                total_purchasers_7[i] = total_purchasers_7[i] + 1
 
     total_purchasers1= 0
         
-    for i in range(len(total_purchasers)):
-        total_purchasers1 += total_purchasers[i]
+    for i in range(len(total_purchasers_7)):
+        total_purchasers1 += total_purchasers_7[i]
 
-    # first time purchasers for each date
-    first_purchasers = [0,0,0,0,0,0,0]
+    # total purchasers for last 30 days
+    total_purchasers_30 = [0] * 30
 
-    # get id of all first time purchasers
-    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE user_id NOT IN (SELECT user_id FROM purchases GROUP BY user_id HAVING COUNT(user_id) > 1)')
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_30_dates[0], last_30_dates[-1]))
 
     rows = cur.fetchall()
 
@@ -154,17 +206,104 @@ def overview():
 
     data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
 
-    for i in range(len(first_purchasers)):
+    for i in range(len(total_purchasers_30)):
+        for j in range(len(data)):
+            if (data[1][j] == last_30_dates[i]):
+                total_purchasers_30[i] = total_purchasers_30[i] + 1
+
+    total_purchasers2 = 0
+        
+    for i in range(len(total_purchasers_30)):
+        total_purchasers2 += total_purchasers_30[i]
+
+    # total purchasers for last 60 days
+    total_purchasers_60 = [0] * 60
+
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_60_dates[0], last_60_dates[-1]))
+
+    rows = cur.fetchall()
+
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    for i in range(len(total_purchasers_60)):
+        for j in range(len(data)):
+            if (data[1][j] == last_60_dates[i]):
+                total_purchasers_60[i] = total_purchasers_60[i] + 1
+
+    total_purchasers3= 0
+        
+    for i in range(len(total_purchasers_60)):
+        total_purchasers3 += total_purchasers_60[i]
+
+    # first time purchasers for each date last 7 days
+    first_purchasers7 = [0] * 7
+
+    # get id of all first time purchasers
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE user_id NOT IN (SELECT user_id FROM purchases WHERE purchase_date BETWEEN (?) AND (?) GROUP BY user_id HAVING COUNT(user_id) > 1)', (last_7_dates[0], last_7_dates[-1]))
+
+    rows = cur.fetchall()
+
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    for i in range(len(first_purchasers7)):
         for j in range(len(data)):
             if (data[1][j] == last_7_dates[i]):
-                first_purchasers[i] = first_purchasers[i] + 1
+                first_purchasers7[i] = first_purchasers7[i] + 1
 
     first_purchasers1 = 0
 
-    for i in range(len(first_purchasers)):
-        first_purchasers1 += first_purchasers[i]
+    for i in range(len(first_purchasers7)):
+        first_purchasers1 += first_purchasers7[i]
 
-    # average purchase revenue per date
+    # first time purchasers for each date last 30 days
+    first_purchasers30 = [0] * 30
+
+    # get id of all first time purchasers
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE user_id NOT IN (SELECT user_id FROM purchases WHERE purchase_date BETWEEN (?) AND (?) GROUP BY user_id HAVING COUNT(user_id) > 1)', (last_30_dates[0], last_30_dates[-1]))
+
+    rows = cur.fetchall()
+
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    for i in range(len(first_purchasers30)):
+        for j in range(len(data)):
+            if (data[1][j] == last_30_dates[i]):
+                first_purchasers30[i] = first_purchasers30[i] + 1
+
+    first_purchasers2 = 0
+
+    for i in range(len(first_purchasers30)):
+        first_purchasers2 += first_purchasers30[i]
+
+    # first time purchasers for each date last 60 days
+    first_purchasers60 = [0] * 60
+
+    # get id of all first time purchasers
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE user_id NOT IN (SELECT user_id FROM purchases WHERE purchase_date BETWEEN (?) AND (?) GROUP BY user_id HAVING COUNT(user_id) > 1)', (last_60_dates[0], last_60_dates[-1]))
+
+    rows = cur.fetchall()
+
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    for i in range(len(first_purchasers60)):
+        for j in range(len(data)):
+            if (data[1][j] == last_60_dates[i]):
+                first_purchasers60[i] = first_purchasers60[i] + 1
+
+    first_purchasers3 = 0
+
+    for i in range(len(first_purchasers60)):
+        first_purchasers3 += first_purchasers60[i]
+
+    # --- average purchase revenue per date last 7 days---
 
     # get columns for the unique users that have purchased
     cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_7_dates[0], last_7_dates[-1]))
@@ -183,13 +322,13 @@ def overview():
     unique_user_purchases = data
 
     # number of users
-    total_users = [0,0,0,0,0,0,0]
+    total_users_7 = [0] * 7
 
     # get number of purchasers for everyday
-    for i in range(len(total_users)):
+    for i in range(len(total_users_7)):
         for j in range(len(unique_user_purchases)):
             if (unique_user_purchases[1][j] == last_7_dates[i]):
-                total_users[i] = total_users[i] + 1
+                total_users_7[i] = total_users_7[i] + 1
 
     # get data for purchases
     cur.execute('SELECT user_id, purchase_date, total_price FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_7_dates[0], last_7_dates[-1]))
@@ -200,69 +339,255 @@ def overview():
     data = pd.DataFrame.from_dict(rows)
 
     # total amount spent by users per day 
-    total_day = [0,0,0,0,0,0,0]
+    total_day_7 = [0,0,0,0,0,0,0]
 
     # get total for everyday
-    for i in range(len(total_day)):
+    for i in range(len(total_day_7)):
         for j in range(len(data)):
             if (data[1][j] == last_7_dates[i]):
-                total_day[i] += round(data[2][j], 2)
+                total_day_7[i] += round(data[2][j], 2)
 
     # round numbers
-    for i in range(len(total_day)):
-        total_day[i] = round(total_day[i], 2)
+    for i in range(len(total_day_7)):
+        total_day_7[i] = round(total_day_7[i], 2)
 
     # get average
-    average = [0,0,0,0,0,0,0]
+    average_7 = [0] * 7
 
-    for i in range(len(average)):
-        if (total_users[i] != 0):
-            average[i] = total_day[i] / total_users[i]
+    for i in range(len(average_7)):
+        if (total_users_7[i] != 0):
+            average_7[i] = total_day_7[i] / total_users_7[i]
 
     # total average
 
     # total number of users
-    total_users_number = 0
+    total_users_number_7 = 0
 
-    for i in range(len(total_users)):
-        total_users_number += total_users[i]
+    for i in range(len(total_users_7)):
+        total_users_number_7 += total_users_7[i]
 
     # total number
     total = 0
 
-    for i in range(len(total_day)):
-        total += total_day[i]
+    for i in range(len(total_day_7)):
+        total += total_day_7[i]
 
     # get average
-    average_total = 0
+    average_total_7 = 0
 
-    if (total_users_number != 0):
-        average_total = total / total_users_number
+    if (total_users_number_7 != 0):
+        average_total_7 = total / total_users_number_7
 
-    # items that were purchased more
-    cur.execute('SELECT p.name AS product_name, pu.product_id, SUM(pu.quantity) AS total_quantity, SUM(pu.total_price) AS total_price FROM purchases pu JOIN products p ON pu.product_id = p.id GROUP BY pu.product_id, p.name ORDER BY total_quantity DESC LIMIT 7')
+    # --- average purchase revenue per date last 30 days---
+
+    # get columns for the unique users that have purchased
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_30_dates[0], last_30_dates[-1]))
+
+    # fetch data
+    rows = cur.fetchall()
+
+    # count unique purchasers for each date
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    # unique users that purchased
+    unique_user_purchases = data
+
+    # number of users
+    total_users_30 = [0] * 30
+
+    # get number of purchasers for everyday
+    for i in range(len(total_users_30)):
+        for j in range(len(unique_user_purchases)):
+            if (unique_user_purchases[1][j] == last_30_dates[i]):
+                total_users_30[i] = total_users_30[i] + 1
+
+    # get data for purchases
+    cur.execute('SELECT user_id, purchase_date, total_price FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_30_dates[0], last_30_dates[-1]))
 
     rows = cur.fetchall()
 
     # turn dictionary into dataframe
     data = pd.DataFrame.from_dict(rows)
 
-    items = []
+    # total amount spent by users per day 
+    total_day_30 = [0] * 30
 
-    quantity = []
+    # get total for everyday
+    for i in range(len(total_day_30)):
+        for j in range(len(data)):
+            if (data[1][j] == last_30_dates[i]):
+                total_day_30[i] += round(data[2][j], 2)
+
+    # round numbers
+    for i in range(len(total_day_30)):
+        total_day_30[i] = round(total_day_30[i], 2)
+
+    # get average
+    average_30 = [0] * 30
+
+    for i in range(len(average_30)):
+        if (total_users_30[i] != 0):
+            average_30[i] = total_day_30[i] / total_users_30[i]
+
+    # total average
+
+    # total number of users
+    total_users_number_30 = 0
+
+    for i in range(len(total_users_30)):
+        total_users_number_30 += total_users_30[i]
+
+    # total number
+    total = 0
+
+    for i in range(len(total_day_30)):
+        total += total_day_30[i]
+
+    # get average
+    average_total_30 = 0
+
+    if (total_users_number_30 != 0):
+        average_total_30 = total / total_users_number_30
+
+    # --- average purchase revenue per date last 60 days---
+
+    # get columns for the unique users that have purchased
+    cur.execute('SELECT user_id, purchase_date FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_60_dates[0], last_60_dates[-1]))
+
+    # fetch data
+    rows = cur.fetchall()
+
+    # count unique purchasers for each date
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    data.drop_duplicates(keep="first", inplace=True, ignore_index=True)
+
+    # unique users that purchased
+    unique_user_purchases = data
+
+    # number of users
+    total_users_60 = [0] * 60
+
+    # get number of purchasers for everyday
+    for i in range(len(total_users_60)):
+        for j in range(len(unique_user_purchases)):
+            if (unique_user_purchases[1][j] == last_60_dates[i]):
+                total_users_60[i] = total_users_60[i] + 1
+
+    # get data for purchases
+    cur.execute('SELECT user_id, purchase_date, total_price FROM purchases WHERE purchase_date BETWEEN (?) AND (?)', (last_60_dates[0], last_60_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    # total amount spent by users per day 
+    total_day_60 = [0] * 60
+
+    # get total for everyday
+    for i in range(len(total_day_60)):
+        for j in range(len(data)):
+            if (data[1][j] == last_60_dates[i]):
+                total_day_60[i] += round(data[2][j], 2)
+
+    # round numbers
+    for i in range(len(total_day_60)):
+        total_day_60[i] = round(total_day_60[i], 2)
+
+    # get average
+    average_60 = [0] * 60
+
+    for i in range(len(average_60)):
+        if (total_users_60[i] != 0):
+            average_60[i] = total_day_60[i] / total_users_60[i]
+
+    # total average
+
+    # total number of users
+    total_users_number_60 = 0
+
+    for i in range(len(total_users_60)):
+        total_users_number_60 += total_users_60[i]
+
+    # total number
+    total = 0
+
+    for i in range(len(total_day_60)):
+        total += total_day_60[i]
+
+    # get average
+    average_total_60 = 0
+
+    if (total_users_number_60 != 0):
+        average_total_60 = round(total / total_users_number_60)
+
+    # --- items that were purchased more last 7 days ---
+    cur.execute('SELECT p.name AS product_name, pu.product_id, SUM(pu.quantity) AS total_quantity, SUM(pu.total_price) AS total_price FROM purchases pu JOIN products p ON pu.product_id = p.id WHERE pu.purchase_date BETWEEN ? AND ? GROUP BY pu.product_id, p.name ORDER BY total_quantity DESC LIMIT 7', (last_7_dates[0], last_7_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    items_7 = []
+
+    quantity_7 = []
 
     for i in range(len(data)):
-        items.append(data[0][i])
+        items_7.append(data[0][i])
 
     for i in range(len(data)):
-        quantity.append(int(data[2][i]))
+        quantity_7.append(int(data[2][i]))
+
+    # --- items that were purchased more last 30 days ---
+    cur.execute('SELECT p.name AS product_name, pu.product_id, SUM(pu.quantity) AS total_quantity, SUM(pu.total_price) AS total_price FROM purchases pu JOIN products p ON pu.product_id = p.id WHERE pu.purchase_date BETWEEN ? AND ? GROUP BY pu.product_id, p.name ORDER BY total_quantity DESC LIMIT 7', (last_30_dates[0], last_30_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    items_30 = []
+
+    quantity_30 = []
+
+    for i in range(len(data)):
+        items_30.append(data[0][i])
+
+    for i in range(len(data)):
+        quantity_30.append(int(data[2][i]))
+
+    # --- items that were purchased more last 60 days ---
+    cur.execute('SELECT p.name AS product_name, pu.product_id, SUM(pu.quantity) AS total_quantity, SUM(pu.total_price) AS total_price FROM purchases pu JOIN products p ON pu.product_id = p.id WHERE pu.purchase_date BETWEEN ? AND ? GROUP BY pu.product_id, p.name ORDER BY total_quantity DESC LIMIT 7', (last_60_dates[0], last_60_dates[-1]))
+
+    rows = cur.fetchall()
+
+    # turn dictionary into dataframe
+    data = pd.DataFrame.from_dict(rows)
+
+    items_60 = []
+
+    quantity_60 = []
+
+    for i in range(len(data)):
+        items_60.append(data[0][i])
+
+    for i in range(len(data)):
+        quantity_60.append(int(data[2][i]))
 
     # close database
     con.commit()
 
     con.close()
 
-    return render_template('overview.html', last_7_days=last_7_days, total_revenue=total_revenue, total_revenue1=total_revenue1,total_purchasers=total_purchasers, total_purchasers1=total_purchasers1,first_purchasers=first_purchasers, first_purchasers1=first_purchasers1, average=average, average_total=average_total,items=items, quantity=quantity)
+    return render_template('overview.html', last_7_days=last_7_days, last_30_days=last_30_days, last_60_days=last_60_days, total_revenue_7=total_revenue_7, total_revenue1=total_revenue1, total_revenue_30=total_revenue_30, total_revenue2=total_revenue2, total_revenue_60=total_revenue_60, total_revenue3=total_revenue3, total_purchasers_7=total_purchasers_7, total_purchasers1=total_purchasers1, total_purchasers_30=total_purchasers_30, total_purchasers2=total_purchasers2, total_purchasers_60=total_purchasers_60, total_purchasers3=total_purchasers3, first_purchasers7=first_purchasers7, first_purchasers1=first_purchasers1, first_purchasers30=first_purchasers30, first_purchasers2=first_purchasers2, first_purchasers60=first_purchasers60, first_purchasers3=first_purchasers3, average_7=average_7, average_total_7=average_total_7, average_30=average_30, average_total_30=average_total_30, average_60=average_60, average_total_60=average_total_60, items_7=items_7, quantity_7=quantity_7,  items_30=items_30, quantity_30=quantity_30,  items_60=items_60, quantity_60=quantity_60)
 
 @app.route("/home")
 def home():
@@ -543,12 +868,17 @@ def home():
         # products
         most_viewed_products_names_last28.append(most_viewed_products_data_last28[i][1])
 
+    # --- users location for heatmap ---
+    cur.execute('SELECT latitude, longitude FROM user_location')
+
+    users_location = cur.fetchall()
+
     # close database
     con.commit()
 
     con.close()
 
-    return render_template('home.html', average=average, last_7_days=last_7_days, average_total=average_total, active_users=active_users, total_active=total_active, count_events=count_events, total_count_events=total_count_events, total_purchasers1=total_purchasers1, total_purchasers=total_purchasers, countries_count=countries_count, countries=countries, new_users_countries=new_users_countries, new_users_count=new_users_count, active_users_count=active_users_count, active_users_countries=active_users_countries, most_viewed_products_count_last7=most_viewed_products_count_last7, most_viewed_products_names_last7=most_viewed_products_names_last7, most_viewed_products_count_last14=most_viewed_products_count_last14, most_viewed_products_names_last14=most_viewed_products_names_last14, most_viewed_products_count_last28=most_viewed_products_count_last28, most_viewed_products_names_last28=most_viewed_products_names_last28)
+    return render_template('home.html', average=average, last_7_days=last_7_days, average_total=average_total, active_users=active_users, total_active=total_active, count_events=count_events, total_count_events=total_count_events, total_purchasers1=total_purchasers1, total_purchasers=total_purchasers, countries_count=countries_count, countries=countries, new_users_countries=new_users_countries, new_users_count=new_users_count, active_users_count=active_users_count, active_users_countries=active_users_countries, most_viewed_products_count_last7=most_viewed_products_count_last7, most_viewed_products_names_last7=most_viewed_products_names_last7, most_viewed_products_count_last14=most_viewed_products_count_last14, most_viewed_products_names_last14=most_viewed_products_names_last14, most_viewed_products_count_last28=most_viewed_products_count_last28, most_viewed_products_names_last28=most_viewed_products_names_last28, users_location=users_location)
 
 @app.route("/behavioralInsights")
 def behavioralInsights():
