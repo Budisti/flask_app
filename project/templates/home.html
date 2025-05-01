@@ -156,6 +156,35 @@
     </style>
 </head>
 <body>
+
+
+
+    <!-- Centered Navigation Bar -->
+    <nav style="
+    background-color: #007bff;
+    padding: 1rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    ">
+    <a href="{{ url_for('index') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Home</a>
+    <a href="{{ url_for('overview') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Overview</a>
+    <a href="{{ url_for('products') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Products</a>
+    <a href="{{ url_for('ecommercePurchases') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Purchases</a>
+    <a href="{{ url_for('purchaseJourney') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Journey</a>
+    <a href="{{ url_for('behavioralInsights') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Insights</a>
+    <a href="{{ url_for('mapDisplay') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Map</a>
+    </nav>
+       
+
+
+
+
+
     <div class="container">
         <h3>Analytics Dashboard</h3>
         

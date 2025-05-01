@@ -44,6 +44,8 @@ print("Connected to database successfully")
 
 # conn.execute('ALTER TABLE user_activity ADD COLUMN login_time TIME')
 
+# conn.execute('DELETE FROM purchases')
+
 print("Created table successfully!")
 
 conn.close()

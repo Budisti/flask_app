@@ -1,92 +1,225 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Leaflet Multiple Marker Groups with Checkboxes</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link 
-    rel="stylesheet" 
-    href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>
-    #map { height: 400px; }
-    .controls {
-      margin-bottom: 10px;
-    }
-  </style>
+    <title>User Locations Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Bootstrap CSS for better looking filters -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #filter-panel {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        #map {
+            flex-grow: 1;
+        }
+        .filter-group {
+            margin-right: 15px;
+        }
+        .user-marker {
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
 
-<div class="controls">
-  <label>
-    <input type="checkbox" id="group1" checked />
-    Show Group 1 (Red)
-  </label>
-  <label>
-    <input type="checkbox" id="group2" checked />
-    Show Group 2 (Blue)
-  </label>
-</div>
+    <!-- Centered Navigation Bar -->
+    <nav style="
+    background-color: #007bff;
+    padding: 1rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    ">
+    <a href="{{ url_for('index') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Home</a>
+    <a href="{{ url_for('overview') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Overview</a>
+    <a href="{{ url_for('products') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Products</a>
+    <a href="{{ url_for('ecommercePurchases') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Purchases</a>
+    <a href="{{ url_for('purchaseJourney') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Journey</a>
+    <a href="{{ url_for('behavioralInsights') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Insights</a>
+    <a href="{{ url_for('mapDisplay') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Map</a>
+    </nav>
+       
 
-<div id="map"></div>
 
-<script 
-  src="https://unpkg.com/leaflet/dist/leaflet.js">
-</script>
-<script>
-  // Initialize map
-  const map = L.map('map').setView([51.505, -0.09], 13);
 
-  // Tile layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
 
-  // Group 1 - Red markers
-  const group1Data = [
-    [51.5, -0.09],
-    [51.51, -0.08]
-  ];
-  const group1Markers = L.layerGroup(group1Data.map(coords =>
-    L.marker(coords, { icon: L.icon({
-      iconUrl: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
-    })})
-  ));
 
-  // Group 2 - Blue markers
-  const group2Data = [
-    [51.49, -0.1],
-    [51.48, -0.09]
-  ];
-  const group2Markers = L.layerGroup(group2Data.map(coords =>
-    L.marker(coords, { icon: L.icon({
-      iconUrl: 'https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
-    })})
-  ));
+    <div id="map-container">
+        <div id="filter-panel" class="d-flex flex-wrap align-items-center">
+            <div class="filter-group mb-2">
+                <label for="status-filter" class="form-label me-2">Status:</label>
+                <select id="status-filter" class="form-select form-select-sm">
+                    <option value="all">All Users</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="premium">Premium</option>
+                </select>
+            </div>
+            <div class="filter-group mb-2">
+                <label for="date-filter" class="form-label me-2">Joined:</label>
+                <select id="date-filter" class="form-select form-select-sm">
+                    <option value="all">All Time</option>
+                    <option value="week">Last Week</option>
+                    <option value="month">Last Month</option>
+                    <option value="year">Last Year</option>
+                </select>
+            </div>
+            <div class="filter-group mb-2">
+                <label for="purchases-filter" class="form-label me-2">Purchases:</label>
+                <select id="purchases-filter" class="form-select form-select-sm">
+                    <option value="all">Any</option>
+                    <option value="1">1+</option>
+                    <option value="5">5+</option>
+                    <option value="10">10+</option>
+                </select>
+            </div>
+            <button id="apply-filters" class="btn btn-primary btn-sm ms-2 mb-2">Apply Filters</button>
+            <button id="reset-filters" class="btn btn-outline-secondary btn-sm ms-2 mb-2">Reset</button>
+        </div>
+        <div id="map"></div>
+    </div>
 
-  // Add both groups initially
-  group1Markers.addTo(map);
-  group2Markers.addTo(map);
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([39.8283, -98.5795], 4); // Center on USA
 
-  // Handle checkboxes
-  document.getElementById('group1').addEventListener('change', function () {
-    if (this.checked) {
-      group1Markers.addTo(map);
-    } else {
-      map.removeLayer(group1Markers);
-    }
-  });
+        // Add tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-  document.getElementById('group2').addEventListener('change', function () {
-    if (this.checked) {
-      group2Markers.addTo(map);
-    } else {
-      map.removeLayer(group2Markers);
-    }
-  });
-</script>
+        // Sample user data - in a real app, this would come from your backend
+        const users = [
+            { id: 1, name: "John Doe", lat: 40.7128, lng: -74.0060, status: "active", joined: "2023-10-15", purchases: 8, city: "New York" },
+            { id: 2, name: "Jane Smith", lat: 34.0522, lng: -118.2437, status: "premium", joined: "2023-09-20", purchases: 15, city: "Los Angeles" },
+            { id: 3, name: "Bob Johnson", lat: 41.8781, lng: -87.6298, status: "active", joined: "2023-11-05", purchases: 3, city: "Chicago" },
+            { id: 4, name: "Alice Brown", lat: 29.7604, lng: -95.3698, status: "inactive", joined: "2022-08-12", purchases: 0, city: "Houston" },
+            { id: 5, name: "Charlie Wilson", lat: 39.9526, lng: -75.1652, status: "active", joined: "2023-10-30", purchases: 7, city: "Philadelphia" },
+            { id: 6, name: "Diana Miller", lat: 33.4484, lng: -112.0740, status: "premium", joined: "2023-07-15", purchases: 22, city: "Phoenix" },
+            { id: 7, name: "Ethan Davis", lat: 32.7157, lng: -117.1611, status: "inactive", joined: "2021-05-18", purchases: 1, city: "San Diego" }
+        ];
+
+        // Create markers for all users
+        const userMarkers = {};
+        const statusColors = {
+            active: '#28a745',
+            inactive: '#dc3545',
+            premium: '#ffc107'
+        };
+
+        // Function to create a marker for a user
+        function createUserMarker(user) {
+            const marker = L.circleMarker([user.lat, user.lng], {
+                radius: 10,
+                fillColor: statusColors[user.status] || '#007bff',
+                color: '#fff',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).bindPopup(`
+                <b>${user.name}</b><br>
+                Status: ${user.status}<br>
+                Joined: ${user.joined}<br>
+                Purchases: ${user.purchases}<br>
+                Location: ${user.city}
+            `);
+            
+            // Store reference to the original user data
+            marker.userData = user;
+            return marker;
+        }
+
+        // Add all users to the map initially
+        users.forEach(user => {
+            userMarkers[user.id] = createUserMarker(user);
+            userMarkers[user.id].addTo(map);
+        });
+
+        // Function to filter markers based on selected filters
+        function filterMarkers() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const dateFilter = document.getElementById('date-filter').value;
+            const purchasesFilter = document.getElementById('purchases-filter').value;
+            
+            const now = new Date();
+            
+            Object.values(userMarkers).forEach(marker => {
+                const user = marker.userData;
+                let show = true;
+                
+                // Apply status filter
+                if (statusFilter !== 'all' && user.status !== statusFilter) {
+                    show = false;
+                }
+                
+                // Apply date filter
+                if (dateFilter !== 'all') {
+                    const joinDate = new Date(user.joined);
+                    const diffTime = now - joinDate;
+                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                    
+                    if (dateFilter === 'week' && diffDays > 7) show = false;
+                    if (dateFilter === 'month' && diffDays > 30) show = false;
+                    if (dateFilter === 'year' && diffDays > 365) show = false;
+                }
+                
+                // Apply purchases filter
+                if (purchasesFilter !== 'all') {
+                    const minPurchases = parseInt(purchasesFilter);
+                    if (user.purchases < minPurchases) show = false;
+                }
+                
+                // Show or hide marker based on filters
+                if (show) {
+                    if (!map.hasLayer(marker)) {
+                        marker.addTo(map);
+                    }
+                } else {
+                    if (map.hasLayer(marker)) {
+                        map.removeLayer(marker);
+                    }
+                }
+            });
+        }
+
+        // Event listeners for filter buttons
+        document.getElementById('apply-filters').addEventListener('click', filterMarkers);
+        document.getElementById('reset-filters').addEventListener('click', () => {
+            document.getElementById('status-filter').value = 'all';
+            document.getElementById('date-filter').value = 'all';
+            document.getElementById('purchases-filter').value = 'all';
+            filterMarkers();
+        });
+
+        // Initial filter application
+        filterMarkers();
+    </script>
 </body>
 </html>
