@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Journey</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            color: #343a40;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .journey-steps {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .step {
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            font-weight: 700;
+        }
+        .drop {
+            background: #dc3545 !important;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 16px;
+        }
+        th, td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 700;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Centered Navigation Bar -->
+    <nav style="
+    background-color: #007bff;
+    padding: 1rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    ">
+    <a href="{{ url_for('index') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Home</a>
+    <a href="{{ url_for('overview') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Overview</a>
+    <a href="{{ url_for('products') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Products</a>
+    <a href="{{ url_for('ecommercePurchases') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Purchases</a>
+    <a href="{{ url_for('purchaseJourney') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Journey</a>
+    <a href="{{ url_for('behavioralInsights') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Insights</a>
+    <a href="{{ url_for('mapDisplay') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Map</a>
+    </nav>
+
+
+
+
+
+
+
+    <div class="container">
+        <h3>Purchase Journey / Device Category</h3>
+        <div class="journey-steps">
+            <div class="step">Session Start (100%)</div>
+            <div class="step drop">View Product ({{ d1 }}%)</div>
+            <div class="step drop">Add to Cart ({{ d2 }}%)</div>
+            <div class="step drop">Begin Checkout ({{ d3 }}%)</div>
+            <div class="step drop">Purchase ({{ d4 }}%)</div>
+        </div>
+        <div class="chart-container">
+            <canvas id="purchaseJourney"></canvas>
+        </div>
+        <table>
+            <tr>
+                <th>Device</th>
+                <th>Visitors (User Count)</th>
+                <th>Views (User Count)</th>
+                <th>Cart (User Count)</th>
+                <th>Checkout (User Count)</th>
+                <th>Purchases (User Count)</th>
+            </tr>
+            <tr>
+                <th>Total</th>
+                {% for item in total %}
+                <td><b>{{ item }}</b> | (100% of total)</td>
+                {% endfor %}
+            </tr>
+            {% set visitors = namespace(c = 0) %}
+            {% set viewers = namespace(c = 0) %}
+            {% set cart = namespace(c = 0) %}
+            {% set checkout = namespace(c = 0) %}
+            {% set purchase = namespace(c = 0) %}
+            {% for row in data %}
+            <tr>
+                {% for i in range(row|length) %}
+                    {% if i == 0 %}
+                        <th>{{ row[i] }}</th>
+                    {% elif i == 1 %}
+                        <td>{{ row[i] }} ({{ partTotal_visitors[visitors.c] }}%) {% set visitors.c = visitors.c + 1 %}</td>
+                    {% elif i == 2 %}
+                        <td>{{ row[i] }} ({{ partTotal_views[cart.c] }}%) {% set cart.c = cart.c + 1 %}</td>
+                    {% elif i == 3 %}
+                        <td>{{ row[i] }} ({{ partTotal_cart[viewers.c] }}%) {% set viewers.c = viewers.c + 1 %}</td>
+                    {% elif i == 4 %}
+                        <td>{{ row[i] }} ({{ partTotal_checkout[checkout.c] }}%) {% set checkout.c = checkout.c + 1 %}</td>
+                    {% elif i == 5 %}
+                        <td>{{ row[i] }} ({{ partTotal_purchase[purchase.c] }}%) {% set purchase.c = purchase.c + 1 %}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <script>
+        const ctx = document.getElementById('purchaseJourney');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Visitors", "Views", "Cart", "Checkout", "Purchases"],
+                datasets: [{
+                    data: {{ total | tojson }},
+                    backgroundColor: ['#007bff', '#ff9800', '#ff5722', '#e91e63', '#dc3545'],
+                    borderRadius: 5,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

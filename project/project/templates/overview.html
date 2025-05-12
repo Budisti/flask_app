@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monetization Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+    <style>
+
+ 
+        /* Main totals - Balanced size */
+        #total_revenue_header,
+        #total_purchasers_header,
+        #first_purchasers_header,
+        #average_purchase_header,
+        #total_revenue_header_compare_against_graph,
+        #total_purchasers_header_compare_against_graph,
+        #first_purchasers_header_compare_against_graph,
+        #average_purchase_header_compare_against
+        {
+            font-size: 2.8rem;  /* Moderate big */
+            font-weight: 800;
+            color: #1f2937; /* Dark gray */
+            text-align: center;
+            margin: 1rem 0;
+            padding: 0;
+            line-height: 1.2;
+        }
+
+        /* Comparison values */
+        #total_revenue_header_compare,
+        #total_purchasers_header_compare,
+        #first_purchasers_header_compare,
+        #average_purchase_header_compare,
+        #total_revenue_header_compare_compare_against_graph,
+        #total_purchasers_header_compare_compare_against_graph,
+        #first_purchasers_header_compare_compare_against_graph,
+        #average_purchase_header_compare_compare_against
+        {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #6b7280; /* muted gray */
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+
+
+
+        body {
+          font-family: 'Inter', sans-serif;
+          background: #f9fafb;
+          margin: 0;
+          padding: 2rem;
+          color: #333;
+        }
+      
+        h1 {
+          text-align: center;
+          font-size: 2.8rem;
+          font-weight: 700;
+          margin-bottom: 2rem;
+        }
+      
+        .filters {
+          max-width: 800px;
+          margin: 0 auto 3rem auto;
+          background: #ffffff;
+          padding: 2rem;
+          border-radius: 20px;
+          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+          text-align: center;
+        }
+      
+        .filters h3, .filters h4 {
+          margin: 0 0 1rem;
+          color: #555;
+        }
+      
+        .filter-group {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
+      
+        .filter-button {
+          display: inline-block;
+          padding: 0.6rem 1.4rem;
+          border: 2px solid #ddd;
+          border-radius: 999px;
+          background: #f3f4f6;
+          font-weight: 500;
+          color: #333;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+      
+        .filter-button:hover {
+          background: #4f46e5;
+          color: white;
+          border-color: #4f46e5;
+        }
+      
+        .filter-button input[type="radio"] {
+          display: none;
+        }
+      
+        .filter-button.active {
+          background: #4f46e5;
+          color: white;
+          border-color: #4f46e5;
+        }
+      
+        .container {
+          max-width: 1400px;
+          margin: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 3rem;
+        }
+      
+        .graph-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 3rem;
+          justify-content: center;
+        }
+      
+        .graph-pair {
+          flex: 1;
+          min-width: 500px;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          align-items: center;
+        }
+      
+        .card {
+          background: #ffffff;
+          border-radius: 20px;
+          padding: 2rem;
+          width: 100%;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+      
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+      
+        .card h3 {
+          font-size: 1.6rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+      
+        .card p.header-value {
+          font-size: 2rem;
+          font-weight: 700;
+          margin: 0.5rem 0;
+          color: #1e88e5;
+        }
+      
+        .card p.compare-value {
+          font-size: 1.2rem;
+          font-weight: 500;
+          color: #777;
+          margin-bottom: 1rem;
+        }
+      
+        .chart-container {
+          width: 100%;
+          height: 400px;
+        }
+      
+        canvas {
+          width: 100% !important;
+          height: 100% !important;
+        }
+      
+        @media (max-width: 768px) {
+          .graph-row {
+            flex-direction: column;
+          }
+      
+          .graph-pair {
+            min-width: 100%;
+          }
+        }
+
+
+
+        /* Add this to your existing styles */
+        .card p.header-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 0.5rem 0 0.25rem;
+            color: #1d4ed8;
+            background: #eff6ff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #bfdbfe;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: inline-block;
+        }
+
+        .card p.compare-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin: 0 0 1rem;
+            padding: 0.4rem 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            display: inline-block;
+            border-left: 3px solid #d1d5db;
+        }
+
+        /* For positive comparison values */
+        .positive {
+            color: #065f46;
+            background: #ecfdf5;
+            border-left-color: #10b981;
+        }
+
+        /* For negative comparison values */
+        .negative {
+            color: #991b1b;
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        /* Card header emphasis */
+        .card h3 {
+            position: relative;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+        }
+      </style>
+</head>
+<body>
+
+
+    <!-- Centered Navigation Bar -->
+    <nav style="
+    background-color: #007bff;
+    padding: 1rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    ">
+    <a href="{{ url_for('index') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Home</a>
+    <a href="{{ url_for('overview') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Overview</a>
+    <a href="{{ url_for('products') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Products</a>
+    <a href="{{ url_for('ecommercePurchases') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Purchases</a>
+    <a href="{{ url_for('purchaseJourney') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Journey</a>
+    <a href="{{ url_for('behavioralInsights') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Insights</a>
+    <a href="{{ url_for('mapDisplay') }}" style="color: #ffffffcc; text-decoration: none; font-weight: 500; transition: color 0.2s;">Map</a>
+    </nav>
+    
+
+
+
+
+
+    <h1>Monetization Overview</h1>
+
+    <div class="filters">
+        <h3>Filters</h3>
+      
+        <h4>Days</h4>
+        <div class="filter-group">
+          <label class="filter-button active"><input type="radio" name="dayRadio" value="7" onchange="handleRadioChange()" checked> Last 7 days</label>
+          <label class="filter-button"><input type="radio" name="dayRadio" value="30" onchange="handleRadioChange()"> Last 30 days</label>
+          <label class="filter-button"><input type="radio" name="dayRadio" value="60" onchange="handleRadioChange()"> Last 60 days</label>
+        </div>
+      
+        <h4>Compare</h4>
+        <div class="filter-group">
+          <label class="filter-button active"><input type="radio" name="compareRadio" value="off" onchange="handleRadioChange()" checked> Off</label>
+          <label class="filter-button"><input type="radio" name="compareRadio" value="on" onchange="handleRadioChange()"> On</label>
+        </div>
+      
+        <h4>Compare Against</h4>
+        <div class="filter-group">
+          <label class="filter-button active"><input type="radio" name="compareAgainstRadio" value="off" onchange="handleRadioChange()" checked> Off</label>
+          <label class="filter-button"><input type="radio" name="compareAgainstRadio" value="Active Users" onchange="handleRadioChange()"> Active Users</label>
+          <label class="filter-button"><input type="radio" name="compareAgainstRadio" value="New Users" onchange="handleRadioChange()"> New Users</label>
+          <label class="filter-button"><input type="radio" name="compareAgainstRadio" value="Returning Users" onchange="handleRadioChange()"> Returning Users</label>
+        </div>
+      </div>
+      
+
+    <div class="container">
+        <!-- Revenue Row -->
+        <div class="graph-row">
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>Total Revenue</h3>
+                    <p id="total_revenue_header">${{ total_revenue1 }}</p>
+                    <p id="total_revenue_header_compare"></p>
+                    <div class="chart-container">
+                        <canvas id="totalRevenue"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>Total Revenue Compare</h3>
+                    <p id="total_revenue_header_compare_against_graph"> $ {{ total_revenue1_compare_against | tojson }} </p>
+                    <p id="total_revenue_header_compare_compare_against_graph"></p>
+                    <div class="chart-container">
+                        <canvas id="totalRevenue_compare_against_graph"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchasers Row -->
+        <div class="graph-row">
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>Total Purchasers</h3>
+                    <p id="total_purchasers_header">{{ total_purchasers1 }}</p>
+                    <p id="total_purchasers_header_compare"></p>
+                    <div class="chart-container">
+                        <canvas id="totalPurchasers"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>Total Purchasers Compare</h3>
+                    <p id="total_purchasers_header_compare_against_graph"> {{ total_revenue1_compare_against | tojson }} </p>
+                    <p id="total_purchasers_header_compare_compare_against_graph"></p>
+                    <div class="chart-container">
+                        <canvas id="totalPurchasers_compare_against_graph"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- First Purchasers Row -->
+        <div class="graph-row">
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>First Time Purchasers</h3>
+                    <p id="first_purchasers_header">{{ first_purchasers1 }}</p>
+                    <p id="first_purchasers_header_compare"></p>
+                    <div class="chart-container">
+                        <canvas id="newPurchasers"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>First Purchasers Compare</h3>
+                    <p id="first_purchasers_header_compare_against_graph"></p>
+                    <p id="first_purchasers_header_compare_compare_against_graph"></p>
+                    <div class="chart-container">
+                        <canvas id="firstPurchasers_compare_against_graph"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Purchase Row -->
+        <div class="graph-row">
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>Average Purchase Revenue per User</h3>
+                    <p id="average_purchase_header">${{ average_total_7 }}</p>
+                    <p id="average_purchase_header_compare"></p>
+                    <div class="chart-container">
+                        <canvas id="average"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="graph-pair">
+                <div class="card">
+                    <h2>Average Purchase Revenue - 7 Days Compare</h2>
+                    <p id="average_purchase_header_compare_against"></p>
+                    <p id="average_purchase_header_compare_compare_against"></p>
+                    <div class="chart-container">
+                        <canvas id="averagePurchase_compare_against_graph"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Purchased Row -->
+        <div class="graph-row">
+            <div class="graph-pair">
+                <div class="card">
+                    <h3>Items Purchased</h3>
+                    <div class="chart-container">
+                        <canvas id="mostSold"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="graph-pair">
+                <div class="card">
+                    <h2>Top Purchased Products - Compare</h2>
+                    <div class="chart-container">
+                        <canvas id="topProductsCompareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+    document.querySelectorAll('.filter-group').forEach(group => {
+        group.addEventListener('change', e => {
+        group.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+        e.target.closest('.filter-button').classList.add('active');
+        });
+    });
+
+
+
+
+        // total revenue
+        const ctx = document.getElementById('totalRevenue');
+        const revenue_graph = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'Total Revenue',
+                    data: {{ total_revenue_7 | tojson }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+        // total revenue compare against
+        const ctx_compare_against_revenue = document.getElementById('totalRevenue_compare_against_graph');
+        
+        const revenue_graph_compare_against = new Chart(ctx_compare_against_revenue, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'Total Revenue',
+                    data: {{ total_revenue_7_compare_against | tojson }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+        // total purchasers
+        const ctx1 = document.getElementById('totalPurchasers');
+        
+        const total_purchasers_graph = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'Total Purchasers',
+                    data: {{ total_purchasers_7 | tojson }},
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+
+
+        // total revenue compare against
+        const ctx_compare_against_total_purchasers = document.getElementById('totalPurchasers_compare_against_graph');
+        
+        const total_purchasers_graph_compare_against = new Chart(ctx_compare_against_total_purchasers, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'Total Revenue',
+                    data: {{ total_purchasers_7_compare_against | tojson }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+
+
+        // first purchasers
+        const ctx2 = document.getElementById('newPurchasers');
+        const first_purchasers_graph = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'First Time Purchasers',
+                    data: {{ first_purchasers7 | tojson }},
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+        // first purchasers compare against
+        const ctx_compare_against_first_purchasers = document.getElementById('firstPurchasers_compare_against_graph');
+
+        const first_purchasers_graph_compare_against = new Chart(ctx_compare_against_first_purchasers, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'First Purchasers',
+                    data: {{ first_purchasers7_compare_against | tojson }},
+                    borderColor: 'rgba(255, 159, 64, 1)', // Orange color
+                    borderWidth: 2
+                }]
+            }
+        });
+
+
+
+        // average
+        const ctx3 = document.getElementById('average');
+        const average_graph = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'Average Purchase Revenue per User',
+                    data: {{ average_7 | tojson }},
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }]
+            }
+        });
+
+
+
+
+        const ctx_average_purchase_compare = document.getElementById('averagePurchase_compare_against_graph').getContext('2d');
+
+        const average_purchase_graph_compare_against = new Chart(ctx_average_purchase_compare, {
+            type: 'line',
+            data: {
+                labels: {{ last_7_days | tojson }},
+                datasets: [{
+                    label: 'Average Purchase Revenue (7 Days)',
+                    data: [0,0,0,0,0,0,0],
+                    borderColor: 'rgba(54, 162, 235, 1)', // blue
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+
+
+
+        // most sold items
+        const ctx4 = document.getElementById('mostSold');
+        items_graph = new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: {{ items_7 | tojson }},
+                datasets: [{
+                    label: 'Items Purchased',
+                    data: {{ quantity_7 | tojson }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }],
+            }
+        });
+
+
+
+        const ctxTopProductsCompare = document.getElementById('topProductsCompareChart').getContext('2d');
+
+        const topProductsCompareChart = new Chart(ctxTopProductsCompare, {
+            type: 'bar',
+            data: {
+                labels: {{ items_7_compare_against | tojson }},
+                datasets: [
+                    {
+                        label: 'This 7 Days (Compare Against)',
+                        data: {{ quantity_7_compare_against | tojson }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)', // blue
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Previous 7 Days (Compare Compare Against)',
+                        data: {{ quantity_7_compare_compare_against | tojson }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)', // red
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+
+
+        // --- variables for 7 days ---
+
+        // --- last 7 days ---
+        const last7dates = {{ last_7_days | tojson }};
+            
+        // --- last 7 days data for graphs ---
+        const last7days_totalRevenue = {{ total_revenue_7 | tojson }};
+
+        const last7days_totalPurchasers = {{ total_purchasers_7 | tojson }};
+
+        const last7days_firstPurchasers = {{ first_purchasers7 | tojson }};
+
+        const last7days_average = {{ average_7 | tojson }};
+
+        const last7days_quantity = {{ quantity_7 | tojson }};
+
+        const last7days_items = {{ items_7 | tojson }};
+
+        // --- last 7 days data for headers ---
+        const last7days_headerRvenue = {{ total_revenue1 }};
+        
+        const last7days_headerTotalPurchasers = {{ total_purchasers1 }};
+
+        const last7days_headerFirstPurchasers = {{ first_purchasers1 }};
+
+        const last7days_averageHeader = {{ average_total_7 }};
+
+        
+        function handleRadioChange() {
+            const selected = document.querySelector('input[name="dayRadio"]:checked').value;
+            const compareMode = document.querySelector('input[name="compareRadio"]:checked').value === 'on';
+            const compareAgainst = document.querySelector('input[name="compareAgainstRadio"]:checked').value;
+
+            // Reset graphs (clear extra datasets if any)
+            clearAllExtraDatasets();
+
+            if (selected === '7') {
+                last7days();
+                if (compareMode) {
+                    last7days_compare(); // <- this adds a second dataset
+                }
+                if (compareAgainst === 'Active Users') {
+                    last7days_compare_against();
+                    if (compareMode) {
+                        last7days_compare_compare_against(); // <- adds second line on compare-against graph
+                    }
+                }
+            }
+
+            if (selected === '30') {
+                last30days();
+                if (compareMode) {
+                    last30days_compare();
+                }
+                if (compareAgainst === 'Active Users') {
+                    last30days_compare_against();
+                    if (compareMode) {
+                        last30days_compare_compare_against();
+                    }
+                }
+            }
+
+            if (selected === '60') {
+                last60days();
+                if (compareMode) {
+                    last60days_compare();
+                }
+                if (compareAgainst === 'Active Users') {
+                    last60days_compare_against();
+                    if (compareMode) {
+                        last60days_compare_compare_against();
+                    }
+                }
+            }
+        }
+
+
+        function clearAllExtraDatasets() {
+            [revenue_graph, revenue_graph_compare_against, total_purchasers_graph_compare_against, first_purchasers_graph_compare_against, topProductsCompareChart, total_purchasers_graph, first_purchasers_graph, average_graph, items_graph].forEach(graph => {
+                if (graph.data.datasets.length > 1) {
+                    graph.data.datasets = [graph.data.datasets[0]]; // Keep only the first dataset
+                    graph.update();
+                }
+            });
+        }
+
+
+        // last7days
+        function last7days() {
+            // --- revenue ---
+            revenue_graph.data.datasets[0].data = last7days_totalRevenue;
+
+            revenue_graph.data.labels = last7dates;
+            
+            revenue_graph.update();
+
+            document.getElementById('total_revenue_header').innerHTML = "$" + last7days_headerRvenue;
+
+            // --- total purchasers ---
+            total_purchasers_graph.data.datasets[0].data = last7days_totalPurchasers;
+
+            total_purchasers_graph.data.labels = last7dates;
+
+            total_purchasers_graph.update();
+
+            document.getElementById('total_purchasers_header').innerHTML = last7days_headerTotalPurchasers;
+
+            // --- first purchasers ---
+            first_purchasers_graph.data.datasets[0].data = last7days_firstPurchasers;
+
+            first_purchasers_graph.data.labels = last7dates;
+
+            first_purchasers_graph.update();
+
+            document.getElementById('first_purchasers_header').innerHTML = last7days_headerFirstPurchasers;
+
+            // --- average ---
+            average_graph.data.datasets[0].data = last7days_average;
+
+            average_graph.data.labels = last7dates;
+
+            average_graph.update();
+
+            document.getElementById('average_purchase_header').innerHTML = "$" + last7days_averageHeader;
+
+            // --- most sold items ---
+            items_graph.data.datasets[0].data = last7days_quantity;
+
+            items_graph.data.labels = last7days_items;
+
+            items_graph.update();
+        }
+
+
+
+        function last7days_compare_against() {
+            // Correct: load Compare Against Revenue
+            revenue_graph_compare_against.data.datasets[0].data = {{ total_revenue_7_compare_against | tojson }};
+            revenue_graph_compare_against.data.labels = last7dates;
+            revenue_graph_compare_against.update();
+
+            document.getElementById('total_revenue_header_compare_against_graph').innerHTML = "$" + {{ total_revenue1_compare_against }};
+
+            // Correct: load Compare Against Total Purchasers
+            total_purchasers_graph_compare_against.data.datasets[0].data = {{ total_purchasers_7_compare_against | tojson }};
+            total_purchasers_graph_compare_against.data.labels = last7dates;
+            total_purchasers_graph_compare_against.update();
+
+            document.getElementById('total_purchasers_header_compare_against_graph').innerHTML = "$" + {{ total_purchasers1_compare_against }};
+
+
+             // --- first purchasers ---
+            first_purchasers_graph_compare_against.data.datasets[0].data = {{ first_purchasers7_compare_against | tojson }};
+            first_purchasers_graph_compare_against.data.labels = last7dates;
+            first_purchasers_graph_compare_against.update();
+            document.getElementById('first_purchasers_header_compare_against_graph').innerHTML = {{ first_purchasers1_compare_against }};
+
+
+
+            // update top products compare against graph
+            topProductsCompareChart.data.datasets[0].data = {{ quantity_7_compare_against | tojson }};
+            topProductsCompareChart.data.labels = {{ items_7_compare_against | tojson }};
+            topProductsCompareChart.update();
+
+        }
+
+
+
+
+
+
+
+        function last30days() {
+
+            // --- revenue ---
+            revenue_graph.data.datasets[0].data = {{ total_revenue_30 | tojson}};
+
+            revenue_graph.data.labels = {{ last_30_days | tojson }};
+            
+            revenue_graph.update();
+
+            document.getElementById('total_revenue_header').innerHTML = "$" + {{ total_revenue2 | tojson }};
+
+            // --- total purchasers ---
+            total_purchasers_graph.data.datasets[0].data = {{ total_purchasers_30 | tojson}};
+
+            total_purchasers_graph.data.labels = {{ last_30_days | tojson }};
+
+            total_purchasers_graph.update();
+
+            document.getElementById('total_purchasers_header').innerHTML = {{ total_purchasers2 | tojson }};
+
+            // --- first purchasers ---
+            first_purchasers_graph.data.datasets[0].data = {{ first_purchasers30 | tojson }};
+
+            first_purchasers_graph.data.labels = {{ last_30_days | tojson }};
+
+            first_purchasers_graph.update();
+
+            document.getElementById('first_purchasers_header').innerHTML = {{ first_purchasers2 | tojson }};
+
+            // --- average ---
+            average_graph.data.datasets[0].data = {{ average_30 | tojson }};
+
+            average_graph.data.labels = {{ last_30_days | tojson }};
+
+            average_graph.update();
+
+            document.getElementById('average_purchase_header').innerHTML = "$" + {{ average_total_30 }};
+
+            // --- most sold items ---
+            items_graph.data.datasets[0].data = {{ quantity_30 | tojson }};
+
+            items_graph.data.labels = {{ items_30 | tojson }};
+
+            items_graph.update();
+        }
+
+      
+
+
+
+        function last30days_compare_against() {
+            // --- revenue ---
+            revenue_graph_compare_against.data.datasets[0].data = {{ total_revenue_30_compare_against | tojson}};
+
+            revenue_graph_compare_against.data.labels = {{ last_30_days | tojson }};
+
+            revenue_graph_compare_against.update();
+
+            document.getElementById('total_revenue_header_compare_against_graph').innerHTML = "$" + {{ total_revenue2_compare_against | tojson }};
+
+             // --- total purchasers ---
+            total_purchasers_graph_compare_against.data.datasets[0].data = {{ total_purchasers_30_compare_against | tojson }};
+            total_purchasers_graph_compare_against.data.labels = {{ last_30_days | tojson }};
+            total_purchasers_graph_compare_against.update();
+
+            document.getElementById('total_purchasers_header_compare_against_graph').innerHTML = "$" + {{ total_purchasers2_compare_against }};
+
+
+
+            // First Purchasers
+            first_purchasers_graph_compare_against.data.datasets[0].data = {{ first_purchasers30_compare_against | tojson }};
+            first_purchasers_graph_compare_against.data.labels = {{ last_30_days | tojson }};
+            first_purchasers_graph_compare_against.update();
+            document.getElementById('first_purchasers_header_compare_against_graph').innerHTML = {{ first_purchasers2_compare_against }};
+
+
+
+
+            // update top products compare against graph
+            topProductsCompareChart.data.datasets[0].data = {{ quantity_30_compare_against | tojson }};
+            topProductsCompareChart.data.labels = {{ items_30_compare_against | tojson }};
+            topProductsCompareChart.data.datasets[0].label = 'This 30 Days (Compare Against)';
+
+            topProductsCompareChart.update();
+
+        }
+
+
+
+
+
+
+
+        function last60days() {
+
+            // --- revenue ---
+            revenue_graph.data.datasets[0].data = {{ total_revenue_60 | tojson}};
+
+            revenue_graph.data.labels = {{ last_60_days | tojson }};
+
+            revenue_graph.update();
+
+            document.getElementById('total_revenue_header').innerHTML = "$" + {{ total_revenue3 | tojson }};
+
+            // --- total purchasers ---
+            total_purchasers_graph.data.datasets[0].data = {{ total_purchasers_60 | tojson}};
+
+            total_purchasers_graph.data.labels = {{ last_60_days | tojson }};
+
+            total_purchasers_graph.update();
+
+            document.getElementById('total_purchasers_header').innerHTML = {{ total_purchasers3 | tojson }};
+
+            // --- first purchasers ---
+            first_purchasers_graph.data.datasets[0].data = {{ first_purchasers60 | tojson }};
+
+            first_purchasers_graph.data.labels = {{ last_60_days | tojson }};
+
+            first_purchasers_graph.update();
+
+            document.getElementById('first_purchasers_header').innerHTML = {{ first_purchasers3 | tojson }};
+
+            // --- average ---
+            average_graph.data.datasets[0].data = {{ average_60 | tojson }};
+
+            average_graph.data.labels = {{ last_60_days | tojson }};
+
+            average_graph.update();
+
+            document.getElementById('average_purchase_header').innerHTML = "$" + {{ average_total_60 }};
+
+            // --- most sold items ---
+            items_graph.data.datasets[0].data = {{ quantity_60 | tojson }};
+
+            items_graph.data.labels = {{ items_60 | tojson }};
+
+            items_graph.update();
+        }
+
+
+
+
+
+        function last60days_compare_against() {
+            // --- revenue ---
+            revenue_graph_compare_against.data.datasets[0].data = {{ total_revenue_60_compare_against | tojson}};
+
+            revenue_graph_compare_against.data.labels = {{ last_60_days | tojson }};
+
+            revenue_graph_compare_against.update();
+
+            document.getElementById('total_revenue_header_compare_against_graph').innerHTML = "$" + {{ total_revenue3_compare_against | tojson }};
+
+
+
+
+             // --- total purchasers ---
+            total_purchasers_graph_compare_against.data.datasets[0].data = {{ total_purchasers_60_compare_against | tojson }};
+            total_purchasers_graph_compare_against.data.labels = {{ last_60_days | tojson }};
+            total_purchasers_graph_compare_against.update();
+
+            document.getElementById('total_purchasers_header_compare_against_graph').innerHTML = "$" + {{ total_purchasers3_compare_against }};
+
+
+
+
+            // First Purchasers
+            first_purchasers_graph_compare_against.data.datasets[0].data = {{ first_purchasers60_compare_against | tojson }};
+            first_purchasers_graph_compare_against.data.labels = {{ last_60_days | tojson }};
+            first_purchasers_graph_compare_against.update();
+            document.getElementById('first_purchasers_header_compare_against_graph').innerHTML = {{ first_purchasers3_compare_against }};
+
+        }
+
+
+
+
+
+        function last7days_compare () {
+            // remove graph of revenue
+            if (revenue_graph.data.datasets.length > 1) {
+                revenue_graph.data.datasets.pop();
+            }
+
+            // compare 7 days revenue
+            revenue_graph.data.datasets.push({
+                label: '7-Day Revenue Comparison',
+                data: {{ total_revenue_7_comparison | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            revenue_graph.update();
+
+            // compare 7 days revenue compare
+            document.getElementById('total_revenue_header_compare').innerHTML = {{ total_revenue1_comparison }};
+
+            // total purchasers graph
+            if (total_purchasers_graph.data.datasets.length > 1) {
+                total_purchasers_graph.data.datasets.pop();
+            }
+
+            // compare 7 days total purchasers
+            total_purchasers_graph.data.datasets.push({
+                label: '7-Day Total Purchasers Comparison',
+                data: {{ total_purchasers_7_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            total_purchasers_graph.update();
+
+            // compare 7 days revenue compare
+            document.getElementById('total_purchasers_header_compare').innerHTML = {{ total_purchasers1_compare }};
+
+            // total purchasers graph
+            if (first_purchasers_graph.data.datasets.length > 1) {
+                first_purchasers_graph.data.datasets.pop();
+            }
+
+            // compare 7 days first purchasers
+            first_purchasers_graph.data.datasets.push({
+                label: '7-Day First Purchasers Comparison',
+                data: {{ first_purchasers7_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            first_purchasers_graph.update();
+
+            // compare 7 days revenue compare
+            document.getElementById('first_purchasers_header_compare').innerHTML = {{ first_purchasers1_compare }};
+
+            // average graph
+            if (average_graph.data.datasets.length > 1) {
+                average_graph.data.datasets.pop();
+            }
+
+            // compare 7 days first purchasers
+            average_graph.data.datasets.push({
+                label: '7-Day Average Comparison',
+                data: {{ average_7_compare_average | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            average_graph.update();
+
+            // compare 7 days average
+            document.getElementById('average_purchase_header_compare').innerHTML = "$" + {{ average_total_7_compare_average }};
+
+            // items graph
+            if (items_graph.data.datasets.length > 1) {
+                items_graph.data.datasets.pop();
+            }
+
+            // compare 7 days first purchasers
+            items_graph.data.datasets.push({
+                label: '7-Day Items Comparison',
+                data: {{ quantity_7_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            items_graph.update();
+        }
+
+
+
+
+        function last7days_compare_compare_against() {
+            // Correct: push second dataset without popping
+            revenue_graph_compare_against.data.datasets.push({
+                label: '7-Day Revenue Compare (Compare Against)',
+                data: {{ total_revenue_7_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+            revenue_graph_compare_against.update();
+
+            document.getElementById('total_revenue_header_compare_compare_against_graph').innerHTML = "$" + {{ total_revenue1_compare_compare_against }};
+
+            // Same for purchasers
+            total_purchasers_graph_compare_against.data.datasets.push({
+                label: '7-Day Purchasers Compare (Compare Against)',
+                data: {{ total_purchasers_7_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+            total_purchasers_graph_compare_against.update();
+
+            document.getElementById('total_purchasers_header_compare_compare_against_graph').innerHTML =  {{ total_purchasers1_compare_compare_against }};
+
+
+            // First Purchasers
+            first_purchasers_graph_compare_against.data.datasets.push({
+                label: '7-Day First Purchasers Compare (Compare Against)',
+                data: {{ first_purchasers7_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+
+            first_purchasers_graph_compare_against.update();
+            
+            document.getElementById('first_purchasers_header_compare_compare_against_graph').innerHTML = {{ first_purchasers1_compare_compare_against }};
+
+
+            // add second dataset for top products compare compare
+            topProductsCompareChart.data.datasets.push({
+                label: 'Previous 7 Days (Compare Compare Against)',
+                data: {{ quantity_7_compare_compare_against | tojson }},
+                backgroundColor: 'rgba(255, 99, 132, 0.7)', // red
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            });
+
+            topProductsCompareChart.update();
+        }
+
+
+
+
+
+        function last30days_compare () {
+            // remove graph of revenue
+            if (revenue_graph.data.datasets.length > 1) {
+                revenue_graph.data.datasets.pop();
+            }
+
+            // compare 30 days revenue
+            revenue_graph.data.datasets.push({
+                label: '30-Day Revenue Comparison',
+                data: {{ total_revenue_30_comparison | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            revenue_graph.update();
+
+            // compare 30 days revenue compare
+            document.getElementById('total_revenue_header_compare').innerHTML = "$" + {{ total_revenue2_comparison }};
+
+            // remove graph of total purchasers
+            if (total_purchasers_graph.data.datasets.length > 1) {
+                total_purchasers_graph.data.datasets.pop();
+            }
+
+            // compare 30 days total purchasers
+            total_purchasers_graph.data.datasets.push({
+                label: '30-Day Total Purchasers Comparison',
+                data: {{ total_purchasers_30_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            total_purchasers_graph.update();
+
+            // compare 30 days total purchasers compare
+            document.getElementById('total_purchasers_header_compare').innerHTML = {{ total_purchasers2_compare }};
+
+            // first purchasers graph
+            if (first_purchasers_graph.data.datasets.length > 1) {
+                first_purchasers_graph.data.datasets.pop();
+            }
+
+            // compare 30 days first purchasers
+            first_purchasers_graph.data.datasets.push({
+                label: '30-Day First Purchasers Comparison',
+                data: {{ first_purchasers30_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            first_purchasers_graph.update();
+
+            // compare 30 days first purchase
+            document.getElementById('first_purchasers_header_compare').innerHTML = {{ first_purchasers2_compare }};
+
+        
+        }
+
+
+        function last30days_compare_compare_against () {
+             // remove graph of revenue
+             if (revenue_graph_compare_against.data.datasets.length > 1) {
+                revenue_graph_compare_against.data.datasets.pop();
+            }
+
+            // compare 30 days revenue
+            revenue_graph_compare_against.data.datasets.push({
+                label: '30-Day Revenue Comparison',
+                data: {{ total_revenue_30_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            revenue_graph_compare_against.update();
+
+            // compare 30 days revenue compare
+            document.getElementById('total_revenue_header_compare_compare_against_graph').innerHTML = "$" + {{ total_revenue2_compare_compare_against }};
+
+
+             // Add 30-day purchasers comparison
+            total_purchasers_graph_compare_against.data.datasets.push({
+                label: '30-Day Purchasers Compare (Compare Against)',
+                data: {{ total_purchasers_30_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+            total_purchasers_graph_compare_against.update();
+
+            document.getElementById('total_purchasers_header_compare_compare_against_graph').innerHTML =  {{ total_purchasers2_compare_compare_against }};
+
+
+            // First Purchasers
+            first_purchasers_graph_compare_against.data.datasets.push({
+                label: '30-Day First Purchasers Compare (Compare Against)',
+                data: {{ first_purchasers30_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+
+            first_purchasers_graph_compare_against.update();
+
+            document.getElementById('first_purchasers_header_compare_compare_against_graph').innerHTML = {{ first_purchasers2_compare_compare_against }};
+
+
+
+            // add second dataset for top products compare compare
+            topProductsCompareChart.data.datasets.push({
+                label: 'Previous 30 Days (Compare Compare Against)',
+                data: {{ quantity_30_compare_compare_against | tojson }},
+                backgroundColor: 'rgba(255, 99, 132, 0.7)', // red
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            });
+
+            topProductsCompareChart.data.datasets[1].label = 'Previous 30 Days (Compare Compare Against)';
+
+            topProductsCompareChart.update();
+
+        }
+
+
+
+        function last60days_compare () {
+            // remove graph of revenue
+            if (revenue_graph.data.datasets.length > 1) {
+                revenue_graph.data.datasets.pop();
+            }
+
+            // compare 60 days revenue
+            revenue_graph.data.datasets.push({
+                label: '60-Day Revenue Comparison',
+                data: {{ total_revenue_60_comparison | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            revenue_graph.update();
+
+            // compare 60 days revenue compare
+            document.getElementById('total_revenue_header_compare').innerHTML = "$" + {{ total_revenue3_comparison }};
+
+            // remove graph of total purchasers
+            if (total_purchasers_graph.data.datasets.length > 1) {
+                total_purchasers_graph.data.datasets.pop();
+            }
+
+            // compare 60 days total purchasers
+            total_purchasers_graph.data.datasets.push({
+                label: '60-Day Total Purchasers Comparison',
+                data: {{ total_purchasers_60_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            total_purchasers_graph.update();
+
+            // compare 60 days revenue compare
+            document.getElementById('first_purchasers_header_compare').innerHTML = {{ total_purchasers3_compare }};
+
+            // first purchasers graph
+            if (first_purchasers_graph.data.datasets.length > 1) {
+                first_purchasers_graph.data.datasets.pop();
+            }
+
+            // compare 60 days first purchasers
+            first_purchasers_graph.data.datasets.push({
+                label: '60-Day First Purchasers Comparison',
+                data: {{ first_purchasers60_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            first_purchasers_graph.update();
+
+            // compare 60 days first purchase
+            document.getElementById('first_purchasers_header_compare').innerHTML = {{ first_purchasers3_compare }};
+
+            // average graph
+            if (average_graph.data.datasets.length > 1) {
+                average_graph.data.datasets.pop();
+            }
+
+            // compare 60 days average
+            average_graph.data.datasets.push({
+                label: '60-Day First Purchasers Comparison',
+                data: {{ average_60_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            average_graph.update();
+
+            // compare 60 days average
+            document.getElementById('average_purchase_header_compare').innerHTML = "$" + {{ average_total_60_compare }};
+
+            // items graph
+           if (items_graph.data.datasets.length > 1) {
+                items_graph.data.datasets.pop();
+            }
+
+            // compare 60 days items
+            items_graph.data.datasets.push({
+                label: '60-Day Items Comparison',
+                data: {{ quantity_60_compare | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            items_graph.update();
+        }
+
+
+
+
+        function last60days_compare_compare_against () {
+             // remove graph of revenue
+             if (revenue_graph_compare_against.data.datasets.length > 1) {
+                revenue_graph_compare_against.data.datasets.pop();
+            }
+
+            // compare 30 days revenue
+            revenue_graph_compare_against.data.datasets.push({
+                label: '60-Day Revenue Comparison',
+                data: {{ total_revenue_60_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                fill: false
+            });
+
+            revenue_graph_compare_against.update();
+
+            // compare 30 days revenue compare
+            document.getElementById('total_revenue_header_compare_compare_against_graph').innerHTML = "$" + {{ total_revenue3_compare_compare_against }};
+
+
+            // Add 60-day purchasers comparison
+            total_purchasers_graph_compare_against.data.datasets.push({
+                label: '60-Day Purchasers Compare (Compare Against)',
+                data: {{ total_purchasers_60_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+            total_purchasers_graph_compare_against.update();
+
+            document.getElementById('total_purchasers_header_compare_compare_against_graph').innerHTML =  {{ total_purchasers3_compare_compare_against }};
+
+
+            
+            // First Purchasers
+            first_purchasers_graph_compare_against.data.datasets.push({
+                label: '60-Day First Purchasers Compare (Compare Against)',
+                data: {{ first_purchasers60_compare_compare_against | tojson }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderDash: [5,5],
+                borderWidth: 2,
+                fill: false
+            });
+            first_purchasers_graph_compare_against.update();
+            document.getElementById('first_purchasers_header_compare_compare_against_graph').innerHTML = {{ first_purchasers3_compare_compare_against }};
+
+        }
+
+
+
+    </script>
+</body>
+</html>

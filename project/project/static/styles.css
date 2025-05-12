@@ -1,0 +1,37 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+h1, h2, h3 {
+    color: #333;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1 1 calc(50% - 40px);
+    box-sizing: border-box;
+}
+.card h3 {
+    margin-top: 0;
+}
+.chart-container {
+    width: 100%;
+    height: 300px; /* Adjusted height for better visibility */
+    margin-top: 10px; /* Reduced margin */
+}
+.card:last-child {
+    flex: 1 1 60%; /* Make the last card narrower */
+    margin: 0 auto; /* Center the last card */
+}
+.card:last-child .chart-container {
+    height: 400px; /* Larger height for the last graph */
+}
